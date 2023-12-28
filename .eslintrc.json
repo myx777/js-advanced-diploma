@@ -1,0 +1,12 @@
+{
+    "env": {
+        "browser": true, //работам в браузере
+        "es6": true, // работаем на этой платформе
+        "jest": true // для работоспособности jest
+    },
+    "extends": "airbnb-base", // какой набор правил используем
+    "parserOptions": {
+        "ecmaVersion": 2018, //экмаверсия
+        "sourceType": "module" //ти модуль
+    }
+}
