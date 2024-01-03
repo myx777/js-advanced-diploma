@@ -1,17 +1,8 @@
 const themes = {
-  prairie: {
-    name: 'prairie',
-  },
-  desert: {
-    name: 'desert',
-  },
-  arctic: {
-    name: 'arctic',
-  },
-  mountain: {
-    name: 'mountain',
-  },
-
+  prairie: 'prairie',
+  desert: 'desert',
+  arctic: 'arctic',
+  mountain: 'mountain',
 };
 
 export default themes;

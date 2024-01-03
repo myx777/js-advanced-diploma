@@ -228,4 +228,40 @@ export default class GamePlay {
       throw new Error('GamePlay not bind to DOM');
     }
   }
+  //случайное число в пределах заданного поля
+  calculateNumber() {
+    return Math.trunc(Math.random() * this.boardSize ** 2);
+  }
+
+  //расчет позиции второй команды
+  positionTeamFirst() {
+    let index;
+    let column; // Переместили определение переменной column сюда
+  
+    do {
+      index = this.calculateNumber();
+      // номер строки, в которой находится клетка
+      const row = Math.floor(index / this.boardSize);
+      // номер столбца, в которой находится клетка
+      column = index % this.boardSize; // Теперь присвоение значения column здесь
+      // Проверка условия: номер столбца равен 1 или 2, и клетка не занята
+    } while (!(column === 0 || column === 1) || this.cells[index].querySelector('.character'));
+  
+    return index;
+  }
+
+  //расчет позиции второй команды
+  positionTeamSecond(){
+    let index;
+    let column;
+  
+    do {
+      index = this.calculateNumber();
+      const row = Math.floor(index / this.boardSize);
+      column = index % this.boardSize;
+      // Проверка условия: номер столбца равен 1 или 2, и клетка не занята
+    } while (!(column === this.boardSize - 1 || column === this.boardSize - 2) || this.cells[index].querySelector('.character'));
+  
+    return index;
+  }
 }
