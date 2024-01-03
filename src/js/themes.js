@@ -11,7 +11,7 @@ const themes = {
   mountain: {
     name: 'mountain',
   },
-  
+
 };
 
 export default themes;

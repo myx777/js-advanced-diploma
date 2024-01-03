@@ -24,42 +24,41 @@
  * */
 export function calcTileType(index, boardSize) {
   // номер строки, в которой находится клетка
-  const row = Math.floor(index / boardSize); 
+  const row = Math.floor(index / boardSize);
   // номер столобца, в которой находится клетка
   const column = index % boardSize;
 
-  if(row === 0 && column === 0) {
+  if (row === 0 && column === 0) {
     return 'top-left';
   }
 
-  if(row === 0 && column === boardSize - 1) {
+  if (row === 0 && column === boardSize - 1) {
     return 'top-right';
   }
 
-  if(row === 0) {
+  if (row === 0) {
     return 'top';
   }
 
-  if(row === boardSize - 1 && column === 0) {
+  if (row === boardSize - 1 && column === 0) {
     return 'bottom-left';
   }
-  if(row === boardSize - 1 && column === boardSize - 1) {
+  if (row === boardSize - 1 && column === boardSize - 1) {
     return 'bottom-right';
   }
 
-  if(row === boardSize - 1) {
+  if (row === boardSize - 1) {
     return 'bottom';
   }
 
-  if(column === 0) {
+  if (column === 0) {
     return 'left';
   }
-  if(column === boardSize - 1) {
+  if (column === boardSize - 1) {
     return 'right';
   }
-  return 'center'
+  return 'center';
 }
-
 
 export function calcHealthLevel(health) {
   if (health < 15) {
