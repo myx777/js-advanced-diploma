@@ -12,6 +12,8 @@ export default class GamePlay {
     this.newGameListeners = [];
     this.saveGameListeners = [];
     this.loadGameListeners = [];
+    // массив для регистрации занятых клеток персонажами
+    this.arrayPosition = [];
   }
 
   bindToDOM(container) {
@@ -228,40 +230,63 @@ export default class GamePlay {
       throw new Error('GamePlay not bind to DOM');
     }
   }
-  //случайное число в пределах заданного поля
+
+  // случайное число в пределах заданного поля
   calculateNumber() {
-    return Math.trunc(Math.random() * this.boardSize ** 2);
+    let numberRandom = Math.trunc(Math.random() * this.boardSize ** 2);
+    if (numberRandom === 0) {
+      numberRandom = 1;
+      return numberRandom;
+    }
+    return numberRandom;
   }
 
-  //расчет позиции второй команды
+  // расчет позиции персонажа первой команды
   positionTeamFirst() {
-    let index;
-    let column; // Переместили определение переменной column сюда
-  
-    do {
-      index = this.calculateNumber();
-      // номер строки, в которой находится клетка
-      const row = Math.floor(index / this.boardSize);
-      // номер столбца, в которой находится клетка
-      column = index % this.boardSize; // Теперь присвоение значения column здесь
-      // Проверка условия: номер столбца равен 1 или 2, и клетка не занята
-    } while (!(column === 0 || column === 1) || this.cells[index].querySelector('.character'));
-  
-    return index;
+    const index = this.calculateNumber();
+    const column = index % this.boardSize;
+    if ((column === 0 || column === 1) && this.arrayPosition.indexOf(index) === -1) {
+      this.arrayPosition.push(index);
+      return index;
+    }
+    return this.positionTeamFirst();
   }
 
-  //расчет позиции второй команды
-  positionTeamSecond(){
-    let index;
-    let column;
-  
-    do {
-      index = this.calculateNumber();
-      const row = Math.floor(index / this.boardSize);
-      column = index % this.boardSize;
-      // Проверка условия: номер столбца равен 1 или 2, и клетка не занята
-    } while (!(column === this.boardSize - 1 || column === this.boardSize - 2) || this.cells[index].querySelector('.character'));
-  
-    return index;
+  // расчет позиции персонажа второй команды
+  positionTeamSecond() {
+    const index = this.calculateNumber();
+    const column = index % this.boardSize;
+    if ((column === this.boardSize - 1 || column === this.boardSize - 2) && this.arrayPosition.indexOf(index) === -1) {
+      this.arrayPosition.push(index);
+      return index;
+    }
+    return this.positionTeamSecond();
   }
+  // ПОЧЕМУ-ТО НЕ РАБОТАЕТ, ОБЪЯСНИТЕ (ПЕРИОДИЧЕСКИ НА ОДНОЙ КЛЕТКЕ РАЗМЕЩВЕТ 2 ПЕРСОНАЖА)
+
+  // расчет позиции второй команды
+  // positionTeamFirst() {
+  //   let index;
+  //   let column;
+
+  //   do {
+  //     index = this.calculateNumber();
+  //     column = index % this.boardSize;
+  //   } while ((column === 0 && column === 1) && this.cells[index].children.length === 0);
+
+  //   return index;
+  // }
+
+  // расчет позиции второй команды
+  // positionTeamSecond(){
+  //   let index;
+  //   let column;
+  //   console.log(this.cells[index])
+  //   do {
+  //     index = this.calculateNumber();
+  //     column = index % this.boardSize;
+  //   } while ((column === this.boardSize - 1 && column === this.boardSize - 2) && this.cells[index].children.length === 0);
+
+  //   return index;
+  // }
 }
