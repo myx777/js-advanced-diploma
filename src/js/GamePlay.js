@@ -256,7 +256,8 @@ export default class GamePlay {
   positionTeamSecond() {
     const index = this.calculateNumber();
     const column = index % this.boardSize;
-    if ((column === this.boardSize - 1 || column === this.boardSize - 2) && this.arrayPosition.indexOf(index) === -1) {
+    if ((column === this.boardSize - 1 || column === this.boardSize - 2)
+        && this.arrayPosition.indexOf(index) === -1) {
       this.arrayPosition.push(index);
       return index;
     }

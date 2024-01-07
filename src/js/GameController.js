@@ -15,8 +15,6 @@ export default class GameController {
   constructor(gamePlay, stateService) {
     this.gamePlay = gamePlay;
     this.stateService = stateService;
-    this.firstTeam = [];
-    this.secondTeam = [];
     this.level = null;
     this.characterCount = null;
   }
@@ -44,25 +42,26 @@ export default class GameController {
 
     const allowedTypesFirstTeam = [Bowman, Swordsman, Magician];
     const allowedTypesSecondTeam = [Vampire, Undead, Daemon];
-    this.firstTeam = generateTeam(allowedTypesFirstTeam, this.level, this.characterCount);
-    this.secondTeam = generateTeam(allowedTypesSecondTeam, this.level, this.characterCount);
 
+    const firstTeam = generateTeam(allowedTypesFirstTeam, this.level, this.characterCount);
+    const secondTeam = generateTeam(allowedTypesSecondTeam, this.level, this.characterCount);
     const position = [];
 
-    this.firstTeam.forEach((character) => {
+    firstTeam.characters.forEach((character) => {
       if (character) {
         const index = this.gamePlay.positionTeamFirst();
         const positionedCharacter = new PositionedCharacter(character, index);
         position.push(positionedCharacter);
       }
     });
-    this.secondTeam.forEach((character) => {
+    secondTeam.characters.forEach((character) => {
       if (character) {
         const index = this.gamePlay.positionTeamSecond();
-        const positionedCharacter = new PositionedCharacter(character, +index);
+        const positionedCharacter = new PositionedCharacter(character, index);
         position.push(positionedCharacter);
       }
     });
+
     this.gamePlay.redrawPositions(position);
   }
 
