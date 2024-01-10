@@ -1,4 +1,6 @@
 import { calcHealthLevel, calcTileType } from './utils';
+// курсор
+import cursors from './cursors';
 
 export default class GamePlay {
   constructor() {
@@ -14,6 +16,8 @@ export default class GamePlay {
     this.loadGameListeners = [];
     // массив для регистрации занятых клеток персонажами
     this.arrayPosition = [];
+    // отображение инфо о персонаже
+    this.stateMessageInfo = false;
   }
 
   bindToDOM(container) {
@@ -183,8 +187,34 @@ export default class GamePlay {
     alert(message);
   }
 
-  static showMessage(message) {
-    alert(message);
+  // отображение инфо о персонаже
+  showMessage(message, index) {
+    if(this.stateMessageInfo === true) {
+      this.removeMessage(index);
+      return;
+    } else {
+      const cell = this.cells[index];
+    
+      const infoMessage = document.createElement('div');
+      infoMessage.className = 'info__message';
+      infoMessage.textContent = message;
+    
+      cell.appendChild(infoMessage);
+      this.setCursor(cursors.pointer);
+      this.stateMessageInfo = true;
+    }
+
+  }
+  // удаление отоброжаемой инфо о персонаже
+  removeMessage(index) {
+    const cell = this.cells[index]
+    const removedMessage = cell.querySelector('.info__message');
+
+    if(removedMessage) {
+      removedMessage.remove();
+      this.setCursor(cursors.auto);
+      this.stateMessageInfo = false;
+    }
   }
 
   selectCell(index, color = 'yellow') {
@@ -199,6 +229,7 @@ export default class GamePlay {
   }
 
   showCellTooltip(message, index) {
+    console.log(message)
     this.cells[index].title = message;
   }
 

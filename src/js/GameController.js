@@ -11,12 +11,17 @@ import { generateTeam } from './generators';
 // стартовая позиция команды
 import PositionedCharacter from './PositionedCharacter';
 
+
 export default class GameController {
   constructor(gamePlay, stateService) {
     this.gamePlay = gamePlay;
     this.stateService = stateService;
     this.level = null;
     this.characterCount = null;
+    this.firstTeam = null;
+    this.secondTeam = null;
+
+    this.position = [];
   }
 
   // начало игры, отрисовка поля и команд + формирование
@@ -26,13 +31,15 @@ export default class GameController {
     this.gamePlay.drawUi(this.theme);
 
     // команды и отрисовка
-    this.newGame();
-    // TODO: add event listeners to gamePlay events
-    // TODO: load saved stated from stateService
+    this.generationTeams();
+
+    this.gamePlay.addCellClickListener(this.onCellClick.bind(this));
+    this.gamePlay.addCellEnterListener(this.onCellEnter.bind(this));
+    this.gamePlay.addCellLeaveListener(this.onCellLeave.bind(this));
   }
 
   // формирование, расстановка и отрисовка персонажей в команде
-  newGame() {
+  generationTeams() {
     this.level = 1;
 
     this.characterCount = Math.trunc(Math.random() * 10);
@@ -43,37 +50,62 @@ export default class GameController {
     const allowedTypesFirstTeam = [Bowman, Swordsman, Magician];
     const allowedTypesSecondTeam = [Vampire, Undead, Daemon];
 
-    const firstTeam = generateTeam(allowedTypesFirstTeam, this.level, this.characterCount);
-    const secondTeam = generateTeam(allowedTypesSecondTeam, this.level, this.characterCount);
-    const position = [];
+    this.firstTeam = generateTeam(allowedTypesFirstTeam, this.level, this.characterCount);
+    this.secondTeam = generateTeam(allowedTypesSecondTeam, this.level, this.characterCount);
+    
 
-    firstTeam.characters.forEach((character) => {
+    this.firstTeam.characters.forEach((character) => {
       if (character) {
         const index = this.gamePlay.positionTeamFirst();
         const positionedCharacter = new PositionedCharacter(character, index);
-        position.push(positionedCharacter);
+        this.position.push(positionedCharacter);
       }
     });
-    secondTeam.characters.forEach((character) => {
+    this.secondTeam.characters.forEach((character) => {
       if (character) {
         const index = this.gamePlay.positionTeamSecond();
         const positionedCharacter = new PositionedCharacter(character, index);
-        position.push(positionedCharacter);
+        this.position.push(positionedCharacter);
       }
     });
 
-    this.gamePlay.redrawPositions(position);
+    this.gamePlay.redrawPositions(this.position);
+  }
+
+   //отображение инфо при слике
+  getInfoCharacter (index) {
+    let levelCharacter;
+    let healthCharacter;
+    let attackCharacter;
+    let defenceCharacter;
+    
+    this.position.forEach(character => {
+      if(character.position === index) {
+        if(character.character) {
+          levelCharacter = character.character.level;
+          healthCharacter = character.character.health;
+          attackCharacter = character.character.attack;
+          defenceCharacter = character.character.defence;
+
+          const message = `\u{1F396}${levelCharacter} \u{2694}${attackCharacter} \u{1F6E1}${defenceCharacter} \u{2764}${healthCharacter}`;
+          this.gamePlay.showMessage(message, index);
+        }
+      }
+    });
+    
   }
 
   onCellClick(index) {
-    // TODO: react to click
+    this.getInfoCharacter(index);
+    
   }
 
   onCellEnter(index) {
-    // TODO: react to mouse enter
+    this.getInfoCharacter(index);
   }
 
   onCellLeave(index) {
-    // TODO: react to mouse leave
+    this.gamePlay.removeMessage(index);
   }
 }
+
