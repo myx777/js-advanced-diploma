@@ -11,7 +11,6 @@ import { generateTeam } from './generators';
 // стартовая позиция команды
 import PositionedCharacter from './PositionedCharacter';
 
-
 export default class GameController {
   constructor(gamePlay, stateService) {
     this.gamePlay = gamePlay;
@@ -52,7 +51,6 @@ export default class GameController {
 
     this.firstTeam = generateTeam(allowedTypesFirstTeam, this.level, this.characterCount);
     this.secondTeam = generateTeam(allowedTypesSecondTeam, this.level, this.characterCount);
-    
 
     this.firstTeam.characters.forEach((character) => {
       if (character) {
@@ -72,16 +70,16 @@ export default class GameController {
     this.gamePlay.redrawPositions(this.position);
   }
 
-   //отображение инфо при слике
-  getInfoCharacter (index) {
+  // отображение инфо при слике
+  getInfoCharacter(index) {
     let levelCharacter;
     let healthCharacter;
     let attackCharacter;
     let defenceCharacter;
-    
-    this.position.forEach(character => {
-      if(character.position === index) {
-        if(character.character) {
+
+    this.position.forEach((character) => {
+      if (character.position === index) {
+        if (character.character) {
           levelCharacter = character.character.level;
           healthCharacter = character.character.health;
           attackCharacter = character.character.attack;
@@ -92,12 +90,10 @@ export default class GameController {
         }
       }
     });
-    
   }
 
   onCellClick(index) {
     this.getInfoCharacter(index);
-    
   }
 
   onCellEnter(index) {
@@ -108,4 +104,3 @@ export default class GameController {
     this.gamePlay.removeMessage(index);
   }
 }
-

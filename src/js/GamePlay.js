@@ -189,28 +189,28 @@ export default class GamePlay {
 
   // отображение инфо о персонаже
   showMessage(message, index) {
-    if(this.stateMessageInfo === true) {
+    // удаление при повторном клике
+    if (this.stateMessageInfo === true) {
       this.removeMessage(index);
-      return;
     } else {
       const cell = this.cells[index];
-    
+
       const infoMessage = document.createElement('div');
       infoMessage.className = 'info__message';
       infoMessage.textContent = message;
-    
+
       cell.appendChild(infoMessage);
       this.setCursor(cursors.pointer);
       this.stateMessageInfo = true;
     }
-
   }
+
   // удаление отоброжаемой инфо о персонаже
   removeMessage(index) {
-    const cell = this.cells[index]
+    const cell = this.cells[index];
     const removedMessage = cell.querySelector('.info__message');
 
-    if(removedMessage) {
+    if (removedMessage) {
       removedMessage.remove();
       this.setCursor(cursors.auto);
       this.stateMessageInfo = false;
@@ -229,7 +229,7 @@ export default class GamePlay {
   }
 
   showCellTooltip(message, index) {
-    console.log(message)
+    console.log(message);
     this.cells[index].title = message;
   }
 
