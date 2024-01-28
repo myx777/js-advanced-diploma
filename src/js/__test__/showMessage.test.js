@@ -1,8 +1,14 @@
-import GameController from '../GameController';
-import GamePlay from '../GamePlay';
+import GameController from "../GameController";
+import GamePlay from "../GamePlay";
+import GameState from "../GameState";
+import Bowman from "../characters/Bowman";
+import Swordsman from "../characters/Swordsman";
 
-jest.mock('../GamePlay');
-describe('GameController', () => {
+import Team from "../Team";
+import PositionedCharacter from "../PositionedCharacter";
+
+jest.mock("../GamePlay");
+describe("GameController", () => {
   let gameController;
   let gamePlay;
 
@@ -13,93 +19,56 @@ describe('GameController', () => {
     // мокирую методы, которые не использую при проверки отобраджения инфо
     gameController.init = jest.fn();
     gameController.generationTeams = jest.fn();
+    const bowman = new Bowman(1);
+    const swordsman = new Swordsman(1);
+
+    let team = [new Team(bowman)];
+    let positions = [];
+
+    const positionBowman = new PositionedCharacter(bowman, 3);
+    const positionSwordsman = new PositionedCharacter(swordsman, 50);
+    positions.push(positionBowman, positionSwordsman);
+
+    gameController.gameState = new GameState(team, [], 1, positions, "theme");
+
+    gameController.init();
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('getInfoCharacter', () => {
-    test('должен отобразить корректное сообщение для персонажа', () => {
-      const positionedCharacter = {
-        position: 3,
-        character: {
-          level: 1, health: 100, attack: 20, defence: 10,
-        },
-      };
-      gameController.position = [positionedCharacter];
+  describe("getInfoCharacter", () => {
+    test("должен отобразить корректное сообщение для персонажа", () => {
+      gameController.getInfoCharacter(3);
 
-      // Вызываем метод init() перед onCellClick
-      gameController.init();
-
-      // Вызываем метод getInfoCharacter (в данном случае onCellClick)
-      gameController.onCellClick(3);
-      console.log(gamePlay.showMessage);
-      // Проверяем, что showMessage вызывается с корректными параметрами
-      expect(gamePlay.showMessage).toHaveBeenCalledWith('\u{1F396}1 \u{2694}20 \u{1F6E1}10 \u{2764}100', 3);
+      expect(gamePlay.showMessage).toHaveBeenCalledWith(
+        "\u{1F396}1 \u{2694}25 \u{1F6E1}25 \u{2764}50",
+        3
+      );
     });
 
-    test('не должен отображать сообщение для пустой ячейки', () => {
-      gameController.position = [];
+    test("не должен отображать сообщение для пустой ячейки", () => {
+      gameController.getInfoCharacter(5);
 
-      // Вызываем метод getInfoCharacter для пустой ячейки
-      gameController.onCellClick(5);
-
-      // Проверяем, что showMessage не вызывается
       expect(gamePlay.showMessage).not.toHaveBeenCalled();
     });
 
-    test('должен отобразить корректное сообщение для персонажа при наведении курсора', () => {
-      const positionedCharacter = {
-        position: 3,
-        character: {
-          level: 1, health: 100, attack: 20, defence: 10,
-        },
-      };
-      gameController.position = [positionedCharacter];
+    test("должен отобразить корректное сообщение для персонажа при наведении курсора", () => {
+      gameController.getInfoCharacter(3);
 
-      // Вызываем метод init() перед onCellClick
-      gameController.init();
-
-      // Вызываем метод getInfoCharacter (в данном случае onCellClick)
-      gameController.onCellEnter(3);
-
-      // Проверяем, что showMessage вызывается с корректными параметрами
-      expect(gamePlay.showMessage).toHaveBeenCalledWith('\u{1F396}1 \u{2694}20 \u{1F6E1}10 \u{2764}100', 3);
+      expect(gamePlay.showMessage).toHaveBeenCalledWith(
+        "\u{1F396}1 \u{2694}25 \u{1F6E1}25 \u{2764}50",
+        3
+      );
     });
 
-    test('при смещении курсора от персонажа должен вызвать метод удаления отображения инфо', () => {
-      const positionedCharacter = {
-        position: 3,
-        character: {
-          level: 1, health: 100, attack: 20, defence: 10,
-        },
-      };
-      gameController.position = [positionedCharacter];
-
-      // Вызываем метод init() перед onCellClick
-      gameController.init();
-
+    test("при смещении курсора от персонажа должен вызвать метод удаления отображения инфо", () => {
       // Дважды вызываем метод getInfoCharacter (в данном случае onCellClick)
       gameController.onCellEnter(3);
       gameController.onCellLeave(3);
       // Проверяем, что вызывается метод removeMessage()
       expect(gamePlay.removeMessage).toHaveBeenCalled();
     });
-
-    // ТАК КАК МЕТОД gamePlay.showMessage МОКИРОВАН, НЕ ВЫЗЫВАЕТСЯ gamePlay.removeMessage, ВЫЗОВ КОТОРОГО НАХОДИТСЯ В showMessage
-    // test('при двойном клике должен вызвать метод удаления отображения инфо', () => {
-    //   const positionedCharacter = { position: 3, character: { level: 1, health: 100, attack: 20, defence: 10 } };
-    //   gameController.position = [positionedCharacter];
-
-    //   // Вызываем метод init() перед onCellClick
-    //   gameController.init();
-
-    //   // Дважды вызываем метод getInfoCharacter (в данном случае onCellClick)
-    //   gameController.onCellClick(3);
-    //   gameController.onCellClick(3);
-    //   // Проверяем, что вызывается метод removeMessage()
-    //   expect(gamePlay.removeMessage).toHaveBeenCalled();
-    // });
   });
 });
