@@ -14,5 +14,18 @@
 export default class Team {
   constructor(characters) {
     this.characters = characters;
+    // console.log(this.characters);
+  }
+  // Метод для добавления персонажа в команду
+  addCharacter(character) {
+    this.characters.push(character);
+  }
+
+  // Метод для удаления персонажа из команды
+  removeCharacter(character) {
+    const index = this.characters.indexOf(character);
+    if (index !== -1) {
+      this.characters.splice(index, 1);
+    }
   }
 }

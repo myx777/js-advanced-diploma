@@ -264,11 +264,7 @@ export default class GamePlay {
 
   // случайное число в пределах заданного поля
   calculateNumber() {
-    let numberRandom = Math.trunc(Math.random() * this.boardSize ** 2);
-    if (numberRandom === 0) {
-      numberRandom = 1;
-      return numberRandom;
-    }
+    let numberRandom = Math.max(2, Math.trunc(Math.random() * this.boardSize ** 2));
     return numberRandom;
   }
 
@@ -294,31 +290,5 @@ export default class GamePlay {
     }
     return this.positionTeamSecond();
   }
-  // ПОЧЕМУ-ТО НЕ РАБОТАЕТ, ОБЪЯСНИТЕ (ПЕРИОДИЧЕСКИ НА ОДНОЙ КЛЕТКЕ РАЗМЕЩВЕТ 2 ПЕРСОНАЖА)
-
-  // расчет позиции второй команды
-  // positionTeamFirst() {
-  //   let index;
-  //   let column;
-
-  //   do {
-  //     index = this.calculateNumber();
-  //     column = index % this.boardSize;
-  //   } while ((column === 0 && column === 1) && this.cells[index].children.length === 0);
-
-  //   return index;
-  // }
-
-  // расчет позиции второй команды
-  // positionTeamSecond(){
-  //   let index;
-  //   let column;
-  //   console.log(this.cells[index])
-  //   do {
-  //     index = this.calculateNumber();
-  //     column = index % this.boardSize;
-  //   } while ((column === this.boardSize - 1 && column === this.boardSize - 2) && this.cells[index].children.length === 0);
-
-  //   return index;
-  // }
+  
 }
