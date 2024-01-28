@@ -11,8 +11,6 @@ export default class GameState {
     this.position = position;
     this.currentCharacter = null;
     this.player = 'player'; // Предполагаю, что "player" всегда начинает первым ходить
-    console.info(this.firstTeam);
-    
   }
 // Получить персонажа по его позиции
 getCharacterByPosition(positionIndex) {

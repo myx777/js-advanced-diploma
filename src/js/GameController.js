@@ -112,6 +112,9 @@ export default class GameController {
   // выделение кликнутого персонажа команды
   getMarkCharacter(index) {
     const selectCharacter = this.gameState.getCharacterByPosition(index);
+    if(!selectCharacter) {
+      return;
+    }
 
     const userCharacter = this.gameState.isCharacterInUserTeam(selectCharacter);
     this.position.forEach((characters) => {
