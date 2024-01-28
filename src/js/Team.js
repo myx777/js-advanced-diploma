@@ -16,3 +16,4 @@ export default class Team {
     this.characters = characters;
   }
 }
+
