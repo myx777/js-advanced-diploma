@@ -13,6 +13,7 @@ import PositionedCharacter from "./PositionedCharacter";
 import GameState from "./GameState";
 import GamePlay from "./GamePlay";
 import Team from "./Team";
+import Team from "./Team";
 
 export default class GameController {
   constructor(gamePlay, stateService) {
@@ -60,6 +61,7 @@ export default class GameController {
       this.characterCount = 2;
     }
     //формирование команд
+    //формирование команд
     const allowedTypesFirstTeam = [Bowman, Swordsman, Magician];
     const allowedTypesSecondTeam = [Vampire, Undead, Daemon];
 
@@ -74,6 +76,7 @@ export default class GameController {
       this.characterCount
     );
 
+    //расстановка персонажей
     //расстановка персонажей
     this.firstTeam.characters.forEach((character) => {
       if (character) {
@@ -103,11 +106,13 @@ export default class GameController {
   }
 
   // отображение инфо при клике
+  // отображение инфо при клике
   getInfoCharacter(index) {
     let levelCharacter;
     let healthCharacter;
     let attackCharacter;
     let defenceCharacter;
+
 
     const selectCharacter = this.gameState.getCharacterByPosition(index);
 
@@ -125,14 +130,9 @@ export default class GameController {
   // выделение кликнутого персонажа команды
   getMarkCharacter(index) {
     const selectCharacter = this.gameState.getCharacterByPosition(index);
-    if(!selectCharacter) {
-      return;
-    }
-
     if (!selectCharacter) {
       return;
     }
-
     const userCharacter = this.gameState.isCharacterInUserTeam(selectCharacter);
 
     this.position.forEach((character) => {
@@ -144,7 +144,6 @@ export default class GameController {
     });
     if (userCharacter) {
       this.gamePlay.selectCell(index);
-
       const selectedCharacter =
         this.gameState.selectedCharacter(selectCharacter); //! нужен ли
 
