@@ -34,7 +34,6 @@ export default class GameController {
 
     //массив который запоминает текущий индекс персонажа
     this.currentIndexCharacter = [];
-  
   }
 
   // начало игры, отрисовка поля и команд + формирование
@@ -165,7 +164,7 @@ export default class GameController {
   // Функция для расчета доступных клеток для персонажа на доске 8x8
   calculateAvailableCells(rowIndex, columnIndex, boardSize, distance) {
     const availableCells = [];
-  
+
     // Добавляем доступные клетки по вертикали
     for (let dy = -distance; dy <= distance; dy++) {
       const newRow = rowIndex + dy; // Вычисляем индекс строки для новой клетки
@@ -174,7 +173,7 @@ export default class GameController {
         availableCells.push(newRow * boardSize + columnIndex); // Добавляем индекс новой клетки в массив доступных клеток
       }
     }
-  
+
     // Добавляем доступные клетки по горизонтали
     for (let dx = -distance; dx <= distance; dx++) {
       // Проверяем, что клетка находится на горизонтали и расстояние не превышает 4 клетки
@@ -186,7 +185,7 @@ export default class GameController {
         }
       }
     }
-  
+
     // Добавляем доступные клетки по диагонали
     for (let dx = -distance; dx <= distance; dx++) {
       for (let dy = -distance; dy <= distance; dy++) {
@@ -206,76 +205,54 @@ export default class GameController {
         }
       }
     }
-  
+
     return availableCells;
   }
-  
 
   areaForAttack(character, index) {
     const boardSize = this.gamePlay.boardSize;
-    
+
     console.info(this.currentIndexCharacter);
-    
-    if(this.currentIndexCharacter !== null) {
 
-  
-
-      this.currentIndexCharacter.forEach((pos) => this.gamePlay.deselectCell(pos))
+    if (this.currentIndexCharacter !== null) {
+      this.currentIndexCharacter.forEach((pos) =>
+        this.gamePlay.deselectCell(pos)
+      );
       this.currentIndexCharacter.length = 0;
     }
-   
+
     //строка
     const rowIndex = Math.trunc(index / boardSize); //2
 
     //столбец
     const columnIndex = index % boardSize; //2
+    let coefficient;
 
     if (
       character.character.type === "swordsman" ||
       character.character.type === "undead"
     ) {
-      const positionCoordinates = this.calculateAvailableCells(
-        rowIndex,
-        columnIndex,
-        boardSize,
-        1
-      );
-      positionCoordinates.forEach((pos) =>
-     {   
-      this.currentIndexCharacter.push(pos);
-        this.gamePlay.selectCell(pos, "green");}
-      );
+      coefficient = 1;
     } else if (
       character.character.type === "bowman" ||
       character.character.type === "vampire"
     ) {
-      const positionCoordinates = this.calculateAvailableCells(
-        rowIndex,
-        columnIndex,
-        boardSize,
-        2
-      );
-      positionCoordinates.forEach((pos) =>
-      {   
-        this.currentIndexCharacter.push(pos);
-          this.gamePlay.selectCell(pos, "green");}
-      );
+      coefficient = 2;
     } else if (
       character.character.type === "magician" ||
       character.character.type === "daemon"
     ) {
-      const positionCoordinates = this.calculateAvailableCells(
-        rowIndex,
-        columnIndex,
-        boardSize,
-        4
-      );
-      positionCoordinates.forEach((pos) =>
-      {   
-        this.currentIndexCharacter.push(pos);
-          this.gamePlay.selectCell(pos, "green");}
-      );
+      coefficient = 4;
     }
-
+    const positionCoordinates = this.calculateAvailableCells(
+      rowIndex,
+      columnIndex,
+      boardSize,
+      coefficient
+    );
+    positionCoordinates.forEach((pos) => {
+      this.currentIndexCharacter.push(pos);
+      this.gamePlay.selectCell(pos, "green");
+    });
   }
 }
