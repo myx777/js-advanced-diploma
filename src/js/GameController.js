@@ -12,6 +12,7 @@ import { generateTeam } from "./generators";
 import PositionedCharacter from "./PositionedCharacter";
 import GameState from "./GameState";
 import GamePlay from "./GamePlay";
+import Team from "./Team";
 
 export default class GameController {
   constructor(gamePlay, stateService) {
@@ -27,6 +28,13 @@ export default class GameController {
 
     this.gameStateFirstTeam = null;
     this.gameStateSecondTeam = null;
+
+    //возможные клетки атаки
+    this.areaAttackCharacter = [];
+
+    //массив который запоминает текущий индекс персонажа
+    this.currentIndexCharacter = [];
+  
   }
 
   // начало игры, отрисовка поля и команд + формирование
@@ -93,7 +101,7 @@ export default class GameController {
     console.log(this.gameState);
   }
 
-  // отображение инфо при слике
+  // отображение инфо при клике
   getInfoCharacter(index) {
     let levelCharacter;
     let healthCharacter;
@@ -111,16 +119,29 @@ export default class GameController {
       this.gamePlay.showMessage(message, index);
     }
   }
+
   // выделение кликнутого персонажа команды
   getMarkCharacter(index) {
     const selectCharacter = this.gameState.getCharacterByPosition(index);
-
+    if (!selectCharacter) {
+      return;
+    }
     const userCharacter = this.gameState.isCharacterInUserTeam(selectCharacter);
-    this.position.forEach((characters) => {
-      this.gamePlay.deselectCell(characters.position);
+    console.info(this.firstTeam);
+
+    this.position.forEach((character) => {
+      this.gamePlay.deselectCell(character.position);
+      this.areaAttackCharacter.forEach((cell) => {
+        this.gamePlay.deselectCell(cell);
+      });
+      this.areaAttackCharacter.length = 0;
     });
     if (userCharacter) {
       this.gamePlay.selectCell(index);
+      const selectedCharacter =
+        this.gameState.selectedCharacter(selectCharacter); //! нужен ли
+
+      this.areaForAttack(selectedCharacter, index);
     } else {
       GamePlay.showError("Это не твоя команда!");
     }
@@ -139,5 +160,122 @@ export default class GameController {
 
   onCellLeave(index) {
     this.gamePlay.removeMessage(index);
+  }
+
+  // Функция для расчета доступных клеток для персонажа на доске 8x8
+  calculateAvailableCells(rowIndex, columnIndex, boardSize, distance) {
+    const availableCells = [];
+  
+    // Добавляем доступные клетки по вертикали
+    for (let dy = -distance; dy <= distance; dy++) {
+      const newRow = rowIndex + dy; // Вычисляем индекс строки для новой клетки
+      // Проверяем, что новая клетка находится в пределах игрового поля
+      if (newRow >= 0 && newRow < boardSize) {
+        availableCells.push(newRow * boardSize + columnIndex); // Добавляем индекс новой клетки в массив доступных клеток
+      }
+    }
+  
+    // Добавляем доступные клетки по горизонтали
+    for (let dx = -distance; dx <= distance; dx++) {
+      // Проверяем, что клетка находится на горизонтали и расстояние не превышает 4 клетки
+      if (Math.abs(dx) <= distance) {
+        const newColumn = columnIndex + dx; // Вычисляем индекс столбца для новой клетки
+        // Проверяем, что новая клетка находится в пределах игрового поля
+        if (newColumn >= 0 && newColumn < boardSize) {
+          availableCells.push(rowIndex * boardSize + newColumn); // Добавляем индекс новой клетки в массив доступных клеток
+        }
+      }
+    }
+  
+    // Добавляем доступные клетки по диагонали
+    for (let dx = -distance; dx <= distance; dx++) {
+      for (let dy = -distance; dy <= distance; dy++) {
+        // Проверяем, что клетка находится на диагонали и расстояние не превышает 4 клетки
+        if (Math.abs(dx) === Math.abs(dy) && Math.abs(dx) <= distance) {
+          const newRow = rowIndex + dy; // Вычисляем индекс строки для новой клетки
+          const newColumn = columnIndex + dx; // Вычисляем индекс столбца для новой клетки
+          // Проверяем, что новая клетка находится в пределах игрового поля
+          if (
+            newRow >= 0 &&
+            newRow < boardSize &&
+            newColumn >= 0 &&
+            newColumn < boardSize
+          ) {
+            availableCells.push(newRow * boardSize + newColumn); // Добавляем индекс новой клетки в массив доступных клеток
+          }
+        }
+      }
+    }
+  
+    return availableCells;
+  }
+  
+
+  areaForAttack(character, index) {
+    const boardSize = this.gamePlay.boardSize;
+    
+    console.info(this.currentIndexCharacter);
+    
+    if(this.currentIndexCharacter !== null) {
+
+  
+
+      this.currentIndexCharacter.forEach((pos) => this.gamePlay.deselectCell(pos))
+      this.currentIndexCharacter.length = 0;
+    }
+   
+    //строка
+    const rowIndex = Math.trunc(index / boardSize); //2
+
+    //столбец
+    const columnIndex = index % boardSize; //2
+
+    if (
+      character.character.type === "swordsman" ||
+      character.character.type === "undead"
+    ) {
+      const positionCoordinates = this.calculateAvailableCells(
+        rowIndex,
+        columnIndex,
+        boardSize,
+        1
+      );
+      positionCoordinates.forEach((pos) =>
+     {   
+      this.currentIndexCharacter.push(pos);
+        this.gamePlay.selectCell(pos, "green");}
+      );
+    } else if (
+      character.character.type === "bowman" ||
+      character.character.type === "vampire"
+    ) {
+      const positionCoordinates = this.calculateAvailableCells(
+        rowIndex,
+        columnIndex,
+        boardSize,
+        2
+      );
+      positionCoordinates.forEach((pos) =>
+      {   
+        this.currentIndexCharacter.push(pos);
+          this.gamePlay.selectCell(pos, "green");}
+      );
+    } else if (
+      character.character.type === "magician" ||
+      character.character.type === "daemon"
+    ) {
+      const positionCoordinates = this.calculateAvailableCells(
+        rowIndex,
+        columnIndex,
+        boardSize,
+        4
+      );
+      positionCoordinates.forEach((pos) =>
+      {   
+        this.currentIndexCharacter.push(pos);
+          this.gamePlay.selectCell(pos, "green");}
+      );
+    }
+
   }
 }

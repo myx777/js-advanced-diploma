@@ -1,6 +1,4 @@
 import { calcHealthLevel, calcTileType } from './utils';
-// курсор
-import cursors from './cursors';
 
 export default class GamePlay {
   constructor() {
@@ -200,7 +198,7 @@ export default class GamePlay {
       infoMessage.textContent = message;
 
       cell.appendChild(infoMessage);
-      this.setCursor(cursors.pointer);
+      // this.setCursor(cursors.pointer);
       this.stateMessageInfo = true;
     }
   }
@@ -212,7 +210,7 @@ export default class GamePlay {
 
     if (removedMessage) {
       removedMessage.remove();
-      this.setCursor(cursors.auto);
+      // this.setCursor(cursors.auto);
       this.stateMessageInfo = false;
     }
   }
@@ -229,7 +227,6 @@ export default class GamePlay {
   }
 
   showCellTooltip(message, index) {
-    console.log(message);
     this.cells[index].title = message;
   }
 
@@ -294,31 +291,5 @@ export default class GamePlay {
     }
     return this.positionTeamSecond();
   }
-  // ПОЧЕМУ-ТО НЕ РАБОТАЕТ, ОБЪЯСНИТЕ (ПЕРИОДИЧЕСКИ НА ОДНОЙ КЛЕТКЕ РАЗМЕЩВЕТ 2 ПЕРСОНАЖА)
 
-  // расчет позиции второй команды
-  // positionTeamFirst() {
-  //   let index;
-  //   let column;
-
-  //   do {
-  //     index = this.calculateNumber();
-  //     column = index % this.boardSize;
-  //   } while ((column === 0 && column === 1) && this.cells[index].children.length === 0);
-
-  //   return index;
-  // }
-
-  // расчет позиции второй команды
-  // positionTeamSecond(){
-  //   let index;
-  //   let column;
-  //   console.log(this.cells[index])
-  //   do {
-  //     index = this.calculateNumber();
-  //     column = index % this.boardSize;
-  //   } while ((column === this.boardSize - 1 && column === this.boardSize - 2) && this.cells[index].children.length === 0);
-
-  //   return index;
-  // }
 }
