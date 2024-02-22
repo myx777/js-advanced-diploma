@@ -58,7 +58,7 @@ export default class GameController {
     if (this.characterCount === 0) {
       this.characterCount = 2;
     }
-
+    //формирование команд
     const allowedTypesFirstTeam = [Bowman, Swordsman, Magician];
     const allowedTypesSecondTeam = [Vampire, Undead, Daemon];
 
@@ -73,6 +73,7 @@ export default class GameController {
       this.characterCount
     );
 
+    //расстановка персонажей
     this.firstTeam.characters.forEach((character) => {
       if (character) {
         const index = this.gamePlay.positionTeamFirst();
@@ -87,6 +88,8 @@ export default class GameController {
         this.position.push(positionedCharacter);
       }
     });
+
+    //отрисовка
     this.gamePlay.redrawPositions(this.position);
 
     this.gameState = new GameState(
@@ -96,8 +99,6 @@ export default class GameController {
       this.position,
       this.theme
     );
-
-    console.log(this.gameState);
   }
 
   // отображение инфо при клике
@@ -106,6 +107,7 @@ export default class GameController {
     let healthCharacter;
     let attackCharacter;
     let defenceCharacter;
+
     const selectCharacter = this.gameState.getCharacterByPosition(index);
 
     if (selectCharacter !== undefined) {
@@ -155,6 +157,7 @@ export default class GameController {
   //действия  при наведении
   onCellEnter(index) {
     this.getInfoCharacter(index);
+    
   }
 
   onCellLeave(index) {
@@ -208,11 +211,9 @@ export default class GameController {
 
     return availableCells;
   }
-
+  //поле возможных действий
   areaForAttack(character, index) {
     const boardSize = this.gamePlay.boardSize;
-
-    console.info(this.currentIndexCharacter);
 
     if (this.currentIndexCharacter !== null) {
       this.currentIndexCharacter.forEach((pos) =>
@@ -222,10 +223,11 @@ export default class GameController {
     }
 
     //строка
-    const rowIndex = Math.trunc(index / boardSize); //2
+    const rowIndex = Math.trunc(index / boardSize);
 
     //столбец
-    const columnIndex = index % boardSize; //2
+    const columnIndex = index % boardSize; 
+
     let coefficient;
 
     if (
@@ -244,15 +246,26 @@ export default class GameController {
     ) {
       coefficient = 4;
     }
+
     const positionCoordinates = this.calculateAvailableCells(
       rowIndex,
       columnIndex,
       boardSize,
       coefficient
     );
+
     positionCoordinates.forEach((pos) => {
       this.currentIndexCharacter.push(pos);
       this.gamePlay.selectCell(pos, "green");
     });
+
+    // this.position.forEach((pos) => {
+    //   console.info(pos);
+      
+    // });
+    // console.info(this.gameState);
+    console.info(this.gameState.getAllCharactersAndPositions());
+    
+    
   }
 }

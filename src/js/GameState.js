@@ -12,7 +12,8 @@ export default class GameState {
     this.currentCharacter = null;
     this.isPlayerTurn = true;
     this.player = 'player'; // Предполагаю, что "player" всегда начинает первым ходить
-    console.info(this.firstTeam);
+
+    
     
   }
 // Получить персонажа по его позиции
@@ -30,12 +31,30 @@ isCharacterInComputerTeam(character) {
   return this.secondTeam.includes(character);
 }
 
+//флаг выбранного персонажа
 selectedCharacter(character) {// ! нужен ли
  return this.currentCharacter = {
     character,
     selectedCharacter: true,
   }
 }
+
+  info(){
+    console.info(this.firstTeam);
+    console.info(this.secondTeam);
+    
+  }
+
+  getAllCharactersAndPositions() {
+
+    // return team === this.Team ? this.position.filter
+    // this.position
+    // return this.position
+    this.position.forEach((pos) => {
+      console.info(pos.character);
+      
+    });
+  }
   static from(object) {
     // TODO: create object
     return null;
