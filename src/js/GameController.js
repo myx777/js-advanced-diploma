@@ -32,7 +32,7 @@ export default class GameController {
     //возможные клетки атаки
     this.areaAttackCharacter = [];
 
-    //массив который запоминает текущий индекс персонажа
+    //массив возможный действий персонажа
     this.currentIndexCharacter = [];
   }
 
@@ -124,11 +124,12 @@ export default class GameController {
   // выделение кликнутого персонажа команды
   getMarkCharacter(index) {
     const selectCharacter = this.gameState.getCharacterByPosition(index);
+
     if (!selectCharacter) {
       return;
     }
+
     const userCharacter = this.gameState.isCharacterInUserTeam(selectCharacter);
-    console.info(this.firstTeam);
 
     this.position.forEach((character) => {
       this.gamePlay.deselectCell(character.position);
@@ -139,6 +140,7 @@ export default class GameController {
     });
     if (userCharacter) {
       this.gamePlay.selectCell(index);
+
       const selectedCharacter =
         this.gameState.selectedCharacter(selectCharacter); //! нужен ли
 
@@ -157,7 +159,7 @@ export default class GameController {
   //действия  при наведении
   onCellEnter(index) {
     this.getInfoCharacter(index);
-    
+    this.markedActionChar(index);
   }
 
   onCellLeave(index) {
@@ -211,6 +213,7 @@ export default class GameController {
 
     return availableCells;
   }
+
   //поле возможных действий
   areaForAttack(character, index) {
     const boardSize = this.gamePlay.boardSize;
@@ -226,7 +229,7 @@ export default class GameController {
     const rowIndex = Math.trunc(index / boardSize);
 
     //столбец
-    const columnIndex = index % boardSize; 
+    const columnIndex = index % boardSize;
 
     let coefficient;
 
@@ -258,14 +261,25 @@ export default class GameController {
       this.currentIndexCharacter.push(pos);
       this.gamePlay.selectCell(pos, "green");
     });
-
-    // this.position.forEach((pos) => {
-    //   console.info(pos);
-      
-    // });
-    // console.info(this.gameState);
-    console.info(this.gameState.getAllCharactersAndPositions());
-    
-    
   }
+
+  //маркируем возможные действия перса
+  markedActionChar(index) {
+    //получаю позиции команд
+    const positionFirstTeam = this.gameState.getPositionTeam(this.firstTeam);
+    const positionSecondTeam = this.gameState.getPositionTeam(this.secondTeam);
+
+    if (positionFirstTeam.includes(index) || this.currentIndexCharacter.includes(index)) {
+      this.gamePlay.setCursor("pointer");
+    } else if (
+      this.currentIndexCharacter.includes(index) &&
+      positionSecondTeam.includes(index)
+    ) {
+      this.gamePlay.setCursor("crosshair");
+      this.gamePlay.selectCell(index, "red");
+    } else {
+      this.gamePlay.setCursor("not-allowed");
+    }
+  }
+
 }
