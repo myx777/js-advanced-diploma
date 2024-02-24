@@ -12,8 +12,6 @@ import { generateTeam } from "./generators";
 import PositionedCharacter from "./PositionedCharacter";
 import GameState from "./GameState";
 import GamePlay from "./GamePlay";
-import Team from "./Team";
-import Team from "./Team";
 
 export default class GameController {
   constructor(gamePlay, stateService) {
