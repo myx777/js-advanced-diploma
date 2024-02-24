@@ -130,6 +130,9 @@ export default class GameController {
   // выделение кликнутого персонажа команды
   getMarkCharacter(index) {
     const selectCharacter = this.gameState.getCharacterByPosition(index);
+    if(!selectCharacter) {
+      return;
+    }
 
     if (!selectCharacter) {
       return;
