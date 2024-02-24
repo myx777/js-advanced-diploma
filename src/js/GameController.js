@@ -18,6 +18,7 @@ export default class GameController {
   constructor(gamePlay, stateService) {
     this.gamePlay = gamePlay;
     this.stateService = stateService;
+    // this.gameState = new GameState();
     this.level = null;
     this.characterCount = null;
     this.firstTeam = [];

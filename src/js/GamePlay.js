@@ -261,11 +261,7 @@ export default class GamePlay {
 
   // случайное число в пределах заданного поля
   calculateNumber() {
-    let numberRandom = Math.trunc(Math.random() * this.boardSize ** 2);
-    if (numberRandom === 0) {
-      numberRandom = 1;
-      return numberRandom;
-    }
+    let numberRandom = Math.max(2, Math.trunc(Math.random() * this.boardSize ** 2));
     return numberRandom;
   }
 
