@@ -148,8 +148,6 @@ export default class GameController {
       (char) => char.position === index
     );
 
-    console.info(selectChar);
-
     if (selectChar.length > 0) {
       this.selectedCharacter = selectChar;
     } else {
@@ -267,7 +265,7 @@ export default class GameController {
     );
 
     positionCoordinates.forEach((pos) => {
-      if(!this.currentIndexCharacter.includes(pos)) {
+      if (!this.currentIndexCharacter.includes(pos)) {
         this.currentIndexCharacter.push(pos);
       }
 
@@ -277,8 +275,12 @@ export default class GameController {
     });
   }
 
-  //маркируем возможные действия перса
+  //маркируем курсор при возможных действий перса
   markedActionChar(index) {
+    // this.secondCharTeam.characters.forEach((character) => {
+    //   this.gamePlay.deselectCell(character.position);
+    // });
+    
     const positionFirstTeam = this.firstCharTeam.characters.find(
       (character) => character.position === index
     );
@@ -286,15 +288,17 @@ export default class GameController {
       (character) => character.position === index
     );
 
+    const positionSecondTeamBoolean = this.currentIndexCharacter.some(
+      (pos) => positionSecondTeam && pos === positionSecondTeam.position
+    );
+
     if (
       positionFirstTeam !== undefined ||
-      this.currentIndexCharacter.includes(index)
+      (this.currentIndexCharacter.includes(index) && !positionSecondTeamBoolean)
     ) {
       this.gamePlay.setCursor("pointer");
-    } else if (
-      positionSecondTeam !== undefined &&
-      this.currentIndexCharacter.includes(index)
-    ) {
+    } else if (positionSecondTeamBoolean) {
+
       this.gamePlay.setCursor("crosshair");
       this.gamePlay.selectCell(index, "red");
     } else {
@@ -303,21 +307,22 @@ export default class GameController {
   }
 
   // ход игрока
-  moveCharacterUser (index) {
-    console.info(this.currentIndexCharacter);
-    
+  moveCharacterUser(index) {
     if (
       this.firstCharTeam.active &&
       this.currentIndexCharacter.includes(index) &&
       this.selectedPositionChar !== index
     ) {
-      
       //изменение положения персонажа
       this.selectedCharacter[0].position = index;
 
       //обновление положений команд
-      const positionFirst = this.firstCharTeam.characters.map(character => character);
-      const positionSecond = this.secondCharTeam.characters.map(character => character);
+      const positionFirst = this.firstCharTeam.characters.map(
+        (character) => character
+      );
+      const positionSecond = this.secondCharTeam.characters.map(
+        (character) => character
+      );
       //отрисовка
       this.gamePlay.redrawPositions([...positionFirst, ...positionSecond]);
 
