@@ -174,7 +174,7 @@ export default class GameController {
   //действия при клике
   onCellClick(index) {
     this.getMarkCharacter(index);
-    this.moveCharacter(index);
+    this.moveCharacterUser(index);
   }
 
   //действия  при наведении
