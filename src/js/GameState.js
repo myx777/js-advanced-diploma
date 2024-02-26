@@ -1,6 +1,7 @@
 export default class GameState {
     constructor(characters) {
         this.characters = characters;
+        this.active = false;
     }
 
     static from(object) {
@@ -11,7 +12,7 @@ export default class GameState {
                 defence: character.defence,
                 health: character.health,
                 type: character.type,
-                position: position
+                position: position,
             };
         });
         return new GameState(characters);

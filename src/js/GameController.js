@@ -36,6 +36,11 @@ export default class GameController {
 
     //выбранная позиция персонажа
     this.selectedPositionChar = null;
+
+    /**
+     * отдельная переменная длявыранного перса для хода или атаки
+     */
+    this.activeChar = [];
   }
 
   // начало игры, отрисовка поля и команд + формирование
@@ -99,11 +104,14 @@ export default class GameController {
     this.firstCharTeam = new GameState(positionFirst);
     this.secondCharTeam = new GameState(positionSecond);
 
+    // первый ход за игроком при первоначальной отрисовке
+    this.firstCharTeam.active = true;
+
     //отрисовка
     this.gamePlay.redrawPositions([...positionFirst, ...positionSecond]);
   }
 
-  // отображение инфо при клике
+  // отображение инфо при клике или наведении
   getInfoCharacter(index) {
     //снимаю выделение и убираю сообщение
     if (this.selectedPositionChar !== null) {
@@ -132,13 +140,21 @@ export default class GameController {
         this.currentIndexCharacter.forEach((pos) =>
           this.gamePlay.deselectCell(pos)
         );
-        this.currentIndexCharacter.length = 0;
+        // this.currentIndexCharacter.length = 0;
       }
     }
 
-    this.selectedCharacter = this.firstCharTeam.characters.filter(
+    const selectChar = this.firstCharTeam.characters.filter(
       (char) => char.position === index
     );
+
+    console.info(selectChar);
+
+    if (selectChar.length > 0) {
+      this.selectedCharacter = selectChar;
+    } else {
+      return;
+    }
 
     if (this.selectedCharacter.length > 0) {
       this.gamePlay.deselectCell(index);
@@ -152,13 +168,13 @@ export default class GameController {
       undefined
     ) {
       GamePlay.showError("Это не твоя команда!");
-    } 
-
+    }
   }
 
   //действия при клике
   onCellClick(index) {
     this.getMarkCharacter(index);
+    this.moveCharacter(index);
   }
 
   //действия  при наведении
@@ -280,6 +296,28 @@ export default class GameController {
       this.gamePlay.selectCell(index, "red");
     } else {
       this.gamePlay.setCursor("not-allowed");
+    }
+  }
+
+  // ход игрока
+  moveCharacterUser (index) {
+    if (
+      this.firstCharTeam.active &&
+      this.currentIndexCharacter.includes(index) &&
+      this.selectedPositionChar !== index
+    ) {
+      
+      //изменение положения персонажа
+      this.selectedCharacter[0].position = index;
+
+      //обновление положений команд
+      const positionFirst = this.firstCharTeam.characters.map(character => character);
+      const positionSecond = this.secondCharTeam.characters.map(character => character);
+      //отрисовка
+      this.gamePlay.redrawPositions([...positionFirst, ...positionSecond]);
+
+      this.firstCharTeam.active = false;
+      this.secondCharTeam.active = true;
     }
   }
 }
