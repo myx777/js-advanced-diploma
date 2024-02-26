@@ -107,14 +107,11 @@ export default class GameController {
   getInfoCharacter(index) {
     //снимаю выделение и убираю сообщение
     if (this.selectedPositionChar !== null) {
-      this.gamePlay.deselectCell(this.selectedPositionChar);
       this.gamePlay.removeMessage(this.selectedPositionChar);
     }
 
     this.firstCharTeam.characters.forEach((character) => {
       if (character !== undefined && character.position === index) {
-        console.info(character.position);
-        
         const levelCharacter = character.character.level;
         const healthCharacter = character.character.health;
         const attackCharacter = character.character.attack;
@@ -128,35 +125,50 @@ export default class GameController {
 
   // выделение кликнутого персонажа команды
   getMarkCharacter(index) {
+    // снимаю выделение
+    if (this.selectedPositionChar !== null) {
+      this.gamePlay.deselectCell(this.selectedPositionChar);
+      if (this.currentIndexCharacter.length > 0) {
+        this.currentIndexCharacter.forEach((pos) =>
+          this.gamePlay.deselectCell(pos)
+        );
+        this.currentIndexCharacter.length = 0;
+      }
+    }
+
     this.selectedCharacter = this.firstCharTeam.characters.filter(
       (char) => char.position === index
     );
 
     if (this.selectedCharacter.length > 0) {
+      this.gamePlay.deselectCell(index);
       this.selectedPositionChar = null;
       this.gamePlay.selectCell(index);
       this.selectedPositionChar = index;
+      this.areaForAttack(index);
+      this.getInfoCharacter(index);
     } else if (
-      this.secondCharTeam.characters.find((char) => char.position === index)
+      this.secondCharTeam.characters.find((char) => char.position === index) !==
+      undefined
     ) {
       GamePlay.showError("Это не твоя команда!");
-    }
+    } 
+
   }
 
   //действия при клике
   onCellClick(index) {
-    this.getInfoCharacter(index);
     this.getMarkCharacter(index);
   }
 
   //действия  при наведении
   onCellEnter(index) {
-    // this.getInfoCharacter(index);
-    // this.markedActionChar(index);
+    this.getInfoCharacter(index);
+    this.markedActionChar(index);
   }
 
   onCellLeave(index) {
-    // this.gamePlay.removeMessage(index);
+    this.gamePlay.removeMessage(index);
   }
 
   // Функция для расчета доступных клеток для персонажа на доске 8x8
@@ -208,15 +220,8 @@ export default class GameController {
   }
 
   //поле возможных действий
-  areaForAttack(character, index) {
+  areaForAttack(index) {
     const boardSize = this.gamePlay.boardSize;
-
-    if (this.currentIndexCharacter !== null) {
-      this.currentIndexCharacter.forEach((pos) =>
-        this.gamePlay.deselectCell(pos)
-      );
-      this.currentIndexCharacter.length = 0;
-    }
 
     //строка
     const rowIndex = Math.trunc(index / boardSize);
@@ -225,21 +230,16 @@ export default class GameController {
     const columnIndex = index % boardSize;
 
     let coefficient;
+    const characterType =
+      this.selectedCharacter.length > 0
+        ? this.selectedCharacter[0].character.type
+        : [];
 
-    if (
-      character.character.type === "swordsman" ||
-      character.character.type === "undead"
-    ) {
+    if (characterType === "swordsman" || characterType === "undead") {
       coefficient = 1;
-    } else if (
-      character.character.type === "bowman" ||
-      character.character.type === "vampire"
-    ) {
+    } else if (characterType === "bowman" || characterType === "vampire") {
       coefficient = 2;
-    } else if (
-      character.character.type === "magician" ||
-      character.character.type === "daemon"
-    ) {
+    } else if (characterType === "magician" || characterType === "daemon") {
       coefficient = 4;
     }
 
@@ -252,24 +252,29 @@ export default class GameController {
 
     positionCoordinates.forEach((pos) => {
       this.currentIndexCharacter.push(pos);
-      this.gamePlay.selectCell(pos, "green");
+      if (pos !== index) {
+        this.gamePlay.selectCell(pos, "green");
+      }
     });
   }
 
   //маркируем возможные действия перса
   markedActionChar(index) {
-    //получаю позиции команд
-    const positionFirstTeam = this.gameState.getPositionTeam(this.firstTeam);
-    const positionSecondTeam = this.gameState.getPositionTeam(this.secondTeam);
+    const positionFirstTeam = this.firstCharTeam.characters.find(
+      (character) => character.position === index
+    );
+    const positionSecondTeam = this.secondCharTeam.characters.find(
+      (character) => character.position === index
+    );
 
     if (
-      positionFirstTeam.includes(index) ||
+      positionFirstTeam !== undefined ||
       this.currentIndexCharacter.includes(index)
     ) {
       this.gamePlay.setCursor("pointer");
     } else if (
-      this.currentIndexCharacter.includes(index) &&
-      positionSecondTeam.includes(index)
+      positionSecondTeam !== undefined &&
+      this.currentIndexCharacter.includes(index)
     ) {
       this.gamePlay.setCursor("crosshair");
       this.gamePlay.selectCell(index, "red");
