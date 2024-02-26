@@ -20,20 +20,25 @@ export default class GameController {
     this.stateService = stateService;
     this.level = null;
     this.characterCount = null;
-    this.firstTeam = [];
-    this.secondTeam = [];
-    this.gameState = null;
+    // this.firstTeam = [];
+    // this.secondTeam = [];
+    // this.gameState = null;
 
-    this.position = [];
+    // this.position = [];
 
-    this.gameStateFirstTeam = null;
-    this.gameStateSecondTeam = null;
+
+    // this.gameStateFirstTeam = null;
+    // this.gameStateSecondTeam = null;
 
     //возможные клетки атаки
     this.areaAttackCharacter = [];
 
     //массив возможный действий персонажа
     this.currentIndexCharacter = [];
+
+    //команды игрока и компьютера
+    this.firstCharTeam = null;
+    this.secondCharTeam = null;
   }
 
   // начало игры, отрисовка поля и команд + формирование
@@ -67,38 +72,44 @@ export default class GameController {
       this.level,
       this.characterCount
     );
+
     this.secondTeam = generateTeam(
       allowedTypesSecondTeam,
       this.level,
       this.characterCount
     );
 
+      let positionFirst = [];
+      let positionSecond = [];
+
     //расстановка персонажей
     this.firstTeam.characters.forEach((character) => {
       if (character) {
         const index = this.gamePlay.positionTeamFirst();
         const positionedCharacter = new PositionedCharacter(character, index);
-        this.position.push(positionedCharacter);
+        positionFirst.push(positionedCharacter);
       }
     });
+
     this.secondTeam.characters.forEach((character) => {
       if (character) {
         const index = this.gamePlay.positionTeamSecond();
         const positionedCharacter = new PositionedCharacter(character, index);
-        this.position.push(positionedCharacter);
+        positionSecond.push(positionedCharacter);
       }
     });
 
-    //отрисовка
-    this.gamePlay.redrawPositions(this.position);
-
-    this.gameState = new GameState(
-      this.firstTeam,
-      this.secondTeam,
-      this.level,
-      this.position,
-      this.theme
+    this.firstCharTeam = new GameState(
+      positionFirst,
     );
+    this.secondCharTeam = new GameState(
+      positionSecond,
+    );
+
+    //отрисовка
+    this.gamePlay.redrawPositions([...positionFirst, ...positionSecond]);
+    // this.gamePlay.redrawPositions(positionSecond);
+    console.info(this.firstCharTeam);
   }
 
   // отображение инфо при клике
@@ -108,46 +119,55 @@ export default class GameController {
     let attackCharacter;
     let defenceCharacter;
 
-    const selectCharacter = this.gameState.getCharacterByPosition(index);
+    console.info(this.firstCharTeam);
+    console.info(this.secondCharTeam);
 
-    if (selectCharacter !== undefined) {
-      levelCharacter = selectCharacter.level;
-      healthCharacter = selectCharacter.health;
-      attackCharacter = selectCharacter.attack;
-      defenceCharacter = selectCharacter.defence;
+    this.firstCharTeam.characters.forEach((character) => {
+      if (character !== undefined) {
+      levelCharacter = character.character.level;
+      healthCharacter = character.character.health;
+      attackCharacter = character.character.attack;
+      defenceCharacter = character.character.defence;
+    }
 
       const message = `\u{1F396}${levelCharacter} \u{2694}${attackCharacter} \u{1F6E1}${defenceCharacter} \u{2764}${healthCharacter}`;
       this.gamePlay.showMessage(message, index);
-    }
+    });
   }
 
   // выделение кликнутого персонажа команды
   getMarkCharacter(index) {
-    const selectCharacter = this.gameState.getCharacterByPosition(index);
 
-    if (!selectCharacter) {
-      return;
-    }
-
-    const userCharacter = this.gameState.isCharacterInUserTeam(selectCharacter);
-
-    this.position.forEach((character) => {
-      this.gamePlay.deselectCell(character.position);
-      this.areaAttackCharacter.forEach((cell) => {
-        this.gamePlay.deselectCell(cell);
-      });
-      this.areaAttackCharacter.length = 0;
-    });
-    if (userCharacter) {
+    if(this.firstCharTeam.characters.find(char => char.position === index)){
+      console.info(true);
+      
       this.gamePlay.selectCell(index);
-
-      const selectedCharacter =
-        this.gameState.selectedCharacter(selectCharacter); //! нужен ли
-
-      this.areaForAttack(selectedCharacter, index);
-    } else {
-      GamePlay.showError("Это не твоя команда!");
     }
+    // if (!selectCharacter) {
+    //   return;
+    // }
+
+    // const userCharacter = this.gameState.isCharacterInUserTeam(selectCharacter);
+
+    // const markCharacter = this.firstCharTeam.filter()
+
+    // this.position.forEach((character) => {
+    //   this.gamePlay.deselectCell(character.position);
+    //   this.areaAttackCharacter.forEach((cell) => {
+    //     this.gamePlay.deselectCell(cell);
+    //   });
+    //   this.areaAttackCharacter.length = 0;
+    // });
+    // if (userCharacter) {
+    //   this.gamePlay.selectCell(index);
+
+    //   const selectedCharacter =
+    //     this.gameState.selectedCharacter(selectCharacter); //! нужен ли
+
+    //   this.areaForAttack(selectedCharacter, index);
+    // } else {
+    //   GamePlay.showError("Это не твоя команда!");
+    // }
   }
 
   //действия при клике
@@ -158,12 +178,12 @@ export default class GameController {
 
   //действия  при наведении
   onCellEnter(index) {
-    this.getInfoCharacter(index);
-    this.markedActionChar(index);
+    // this.getInfoCharacter(index);
+    // this.markedActionChar(index);
   }
 
   onCellLeave(index) {
-    this.gamePlay.removeMessage(index);
+    // this.gamePlay.removeMessage(index);
   }
 
   // Функция для расчета доступных клеток для персонажа на доске 8x8
