@@ -267,7 +267,10 @@ export default class GameController {
     );
 
     positionCoordinates.forEach((pos) => {
-      this.currentIndexCharacter.push(pos);
+      if(!this.currentIndexCharacter.includes(pos)) {
+        this.currentIndexCharacter.push(pos);
+      }
+
       if (pos !== index) {
         this.gamePlay.selectCell(pos, "green");
       }
@@ -301,6 +304,8 @@ export default class GameController {
 
   // ход игрока
   moveCharacterUser (index) {
+    console.info(this.currentIndexCharacter);
+    
     if (
       this.firstCharTeam.active &&
       this.currentIndexCharacter.includes(index) &&
@@ -318,6 +323,7 @@ export default class GameController {
 
       this.firstCharTeam.active = false;
       this.secondCharTeam.active = true;
+      this.currentIndexCharacter.length = 0;
     }
   }
 }
