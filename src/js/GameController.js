@@ -140,7 +140,6 @@ export default class GameController {
         this.currentIndexCharacter.forEach((pos) =>
           this.gamePlay.deselectCell(pos)
         );
-        // this.currentIndexCharacter.length = 0;
       }
     }
 
@@ -173,6 +172,7 @@ export default class GameController {
   onCellClick(index) {
     this.getMarkCharacter(index);
     this.moveCharacterUser(index);
+    this.attack(this.selectedCharacter, index);
   }
 
   //действия  при наведении
@@ -280,7 +280,7 @@ export default class GameController {
     // this.secondCharTeam.characters.forEach((character) => {
     //   this.gamePlay.deselectCell(character.position);
     // });
-    
+
     const positionFirstTeam = this.firstCharTeam.characters.find(
       (character) => character.position === index
     );
@@ -298,7 +298,6 @@ export default class GameController {
     ) {
       this.gamePlay.setCursor("pointer");
     } else if (positionSecondTeamBoolean) {
-
       this.gamePlay.setCursor("crosshair");
       this.gamePlay.selectCell(index, "red");
     } else {
@@ -315,20 +314,57 @@ export default class GameController {
     ) {
       //изменение положения персонажа
       this.selectedCharacter[0].position = index;
+      //обновляю ситуацию на поле
+      this.updateCharRedraw();
 
-      //обновление положений команд
-      const positionFirst = this.firstCharTeam.characters.map(
-        (character) => character
-      );
-      const positionSecond = this.secondCharTeam.characters.map(
-        (character) => character
-      );
-      //отрисовка
-      this.gamePlay.redrawPositions([...positionFirst, ...positionSecond]);
-
+      //меняю флаги
       this.firstCharTeam.active = false;
       this.secondCharTeam.active = true;
+      //сбрасываю массив с возможныи полями атаки
       this.currentIndexCharacter.length = 0;
     }
+  }
+  // атака игроком
+  async attack(selectedChar, index) {
+    if (
+      !this.firstCharTeam.active ||
+      !Array.isArray(selectedChar) ||
+      !selectedChar.length
+    ) {
+      return;
+    }
+
+    //атакующий перс игрока
+    const attacker = selectedChar[0].character;
+    //защищающийся перс компа
+    let target = this.secondCharTeam.characters.find(
+      (character) => character.position === index
+    );
+
+    if (
+      target !== undefined &&
+      attacker.health > 0 &&
+      this.currentIndexCharacter.includes(index)
+    ) {
+      target = target.character;
+
+      const hit = Math.max(
+        attacker.attack - target.defence,
+        attacker.attack * 0.1
+      );
+      target.health = target.health - hit;
+      await this.gamePlay.showDamage(index, hit);
+      this.updateCharRedraw();
+    }
+  }
+  //обновление и прерисовка персов с новыми положениями
+  updateCharRedraw() {
+    const positionFirst = this.firstCharTeam.characters.map(
+      (character) => character
+    );
+    const positionSecond = this.secondCharTeam.characters.map(
+      (character) => character
+    );
+    this.gamePlay.redrawPositions([...positionFirst, ...positionSecond]);
   }
 }
