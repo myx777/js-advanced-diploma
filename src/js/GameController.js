@@ -36,11 +36,6 @@ export default class GameController {
 
     //выбранная позиция персонажа
     this.selectedPositionChar = null;
-
-    /**
-     * отдельная переменная длявыранного перса для хода или атаки
-     */
-    this.activeChar = [];
   }
 
   // начало игры, отрисовка поля и команд + формирование
@@ -351,11 +346,13 @@ export default class GameController {
       this.secondCharTeam.active = !this.secondCharTeam.active;
       //сбрасываю массив с возможныи полями атаки
       this.currentIndexCharacter.length = 0;
+      this.selectedCharacter.length = 0;
     }
     this.computerLogic();
   }
   // атака игроком
   async attackCharacterUser(selectedChar, index) {
+    // debugger
     if (!Array.isArray(selectedChar) || !selectedChar.length) {
       return;
     }
@@ -370,7 +367,7 @@ export default class GameController {
       target = this.secondCharTeam.characters.find(
         (character) => character.position === index
       );
-    } else if (this.secondCharTeam.active) {
+    } else {
       target = this.firstCharTeam.characters.find(
         (character) => character.position === index
       );
@@ -388,11 +385,23 @@ export default class GameController {
         attacker.attack * 0.1
       );
       target.health = target.health - hit;
-      await this.gamePlay.showDamage(index, hit);
-      this.updateCharRedraw();
 
-      this.firstCharTeam.active = !this.firstCharTeam.active;
-      this.secondCharTeam.active = !this.secondCharTeam.active;
+      // debugger;
+
+      try {
+        await this.gamePlay.showDamage(index, hit);
+      } catch (error) {
+        console.error("Ошибка при отображении урона:", error);
+      } finally {
+        this.updateCharRedraw();
+
+        this.currentIndexCharacter.length = 0;
+        this.selectedCharacter.length = 0;
+
+        this.firstCharTeam.active = !this.firstCharTeam.active;
+        this.secondCharTeam.active = !this.secondCharTeam.active;
+        this.computerLogic();
+      }
     }
   }
   //обновление и прерисовка персов с новыми положениями
@@ -412,6 +421,7 @@ export default class GameController {
     if (this.firstCharTeam.active && !this.secondCharTeam.active) {
       return;
     }
+
     this.selectedCharacter.length = 0;
     // количество персонажей в команде
     const countSecondTeam = this.countCharacter(this.secondCharTeam);
@@ -428,11 +438,11 @@ export default class GameController {
         .map((charater) => charater.position)
         .includes(i)
     );
-    console.info(attackBollean);
 
+    // атака или движение
     if (attackBollean) {
       this.attackCharacterUser(this.selectedCharacter, index);
-    } else if (!attackBollean) {
+    } else {
       // Генерация случайного индекса
       const randomIndex = Math.floor(
         Math.random() * this.currentIndexCharacter.length
@@ -440,7 +450,6 @@ export default class GameController {
 
       // Получение случайного элемента из массива
       const randomElement = this.currentIndexCharacter[randomIndex];
-
       this.moveCharacterUser(randomElement);
     }
   }

@@ -233,20 +233,27 @@ export default class GamePlay {
     this.cells[index].title = '';
   }
 
-  showDamage(index, damage) {
-    return new Promise((resolve) => {
-      const cell = this.cells[index];
-      const damageEl = document.createElement('span');
-      damageEl.textContent = damage;
-      damageEl.classList.add('damage');
-      cell.appendChild(damageEl);
+// Метод для отображения урона и анимации
+showDamage(index, damage) {
+  return new Promise((resolve, reject) => {
+    const cell = this.cells[index];
+    if (!cell) {
+      reject(new Error(`Cell with index ${index} not found`));
+      return;
+    }
 
-      damageEl.addEventListener('animationend', () => {
-        cell.removeChild(damageEl);
-        resolve();
-      });
+    const damageEl = document.createElement('span');
+    damageEl.textContent = damage;
+    damageEl.classList.add('damage');
+    cell.appendChild(damageEl);
+
+    damageEl.addEventListener('animationend', () => {
+      cell.removeChild(damageEl);
+      resolve(); // Разрешаем Promise после завершения анимации
     });
-  }
+  });
+}
+
 
   setCursor(cursor) {
     this.boardEl.style.cursor = cursor;
