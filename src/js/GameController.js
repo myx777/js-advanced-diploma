@@ -117,8 +117,9 @@ export default class GameController {
     if (this.selectedPositionChar !== null) {
       this.gamePlay.removeMessage(this.selectedPositionChar);
     }
-
-    this.firstCharTeam.characters.forEach((character) => {
+    const chars = [...this.firstCharTeam.characters, ...this.secondCharTeam.characters];
+    
+    chars.forEach((character) => {
       if (character !== undefined && character.position === index) {
         const levelCharacter = character.character.level;
         const healthCharacter = character.character.health;
@@ -143,27 +144,23 @@ export default class GameController {
       }
     }
 
-    const selectChar = this.firstCharTeam.characters.filter(
+    const selectCharFirstTeam = this.firstCharTeam.characters.filter(
       (char) => char.position === index
     );
 
-    if (selectChar.length > 0) {
-      this.selectedCharacter = selectChar;
-    } else {
-      return;
-    }
+    const selectCharSecondTeam = this.secondCharTeam.characters.find(
+      (char) => char.position === index
+    );
 
-    if (this.selectedCharacter.length > 0) {
+    if (selectCharFirstTeam.length > 0) {
+      this.selectedCharacter = selectCharFirstTeam;
       this.gamePlay.deselectCell(index);
       this.selectedPositionChar = null;
       this.gamePlay.selectCell(index);
       this.selectedPositionChar = index;
       this.areaForAttack(index);
       this.getInfoCharacter(index);
-    } else if (
-      this.secondCharTeam.characters.find((char) => char.position === index) !==
-      undefined
-    ) {
+    } else if (selectCharSecondTeam !== undefined) {
       GamePlay.showError("Это не твоя команда!");
     }
   }
@@ -277,9 +274,9 @@ export default class GameController {
 
   //маркируем курсор при возможных действий перса
   markedActionChar(index) {
-    // this.secondCharTeam.characters.forEach((character) => {
-    //   this.gamePlay.deselectCell(character.position);
-    // });
+    this.secondCharTeam.characters.forEach((character) => {
+      this.gamePlay.deselectCell(character.position);
+    });
 
     const positionFirstTeam = this.firstCharTeam.characters.find(
       (character) => character.position === index
