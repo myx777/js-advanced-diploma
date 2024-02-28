@@ -117,8 +117,11 @@ export default class GameController {
     if (this.selectedPositionChar !== null) {
       this.gamePlay.removeMessage(this.selectedPositionChar);
     }
-    const chars = [...this.firstCharTeam.characters, ...this.secondCharTeam.characters];
-    
+    const chars = [
+      ...this.firstCharTeam.characters,
+      ...this.secondCharTeam.characters,
+    ];
+
     chars.forEach((character) => {
       if (character !== undefined && character.position === index) {
         const levelCharacter = character.character.level;
@@ -160,16 +163,21 @@ export default class GameController {
       this.selectedPositionChar = index;
       this.areaForAttack(index);
       this.getInfoCharacter(index);
-    } else if (selectCharSecondTeam !== undefined) {
+    } else if (
+      selectCharSecondTeam !== undefined &&
+      this.currentIndexCharacter.length === 0
+    ) {
       GamePlay.showError("Это не твоя команда!");
     }
   }
 
   //действия при клике
   onCellClick(index) {
-    this.getMarkCharacter(index);
-    this.moveCharacterUser(index);
-    this.attack(this.selectedCharacter, index);
+    if (this.firstCharTeam.active) {
+      this.getMarkCharacter(index);
+      this.moveCharacterUser(index);
+      this.attackCharacterUser(this.selectedCharacter, index);
+    }
   }
 
   //действия  при наведении
@@ -181,7 +189,24 @@ export default class GameController {
   onCellLeave(index) {
     this.gamePlay.removeMessage(index);
   }
+  // Проверка принадлежности персонажа к команде
+  get isCharacterInTeam() {
+    return (character, team) => {
+      return team.characters.some(
+        (char) => char.position === character.position
+      );
+    };
+  }
 
+  //количество персов в команде
+  get countCharacter() {
+    return (team) => team.characters.length;
+  }
+
+  // позиции команд
+  get positionTeam() {
+    return (team) => team.characters.map((char) => char.position);
+  }
   // Функция для расчета доступных клеток для персонажа на доске 8x8
   calculateAvailableCells(rowIndex, columnIndex, boardSize, distance) {
     const availableCells = [];
@@ -260,13 +285,17 @@ export default class GameController {
       boardSize,
       coefficient
     );
+    const characterInSecondTeam = this.isCharacterInTeam(
+      this.selectedCharacter[0],
+      this.secondCharTeam
+    );
 
     positionCoordinates.forEach((pos) => {
       if (!this.currentIndexCharacter.includes(pos)) {
         this.currentIndexCharacter.push(pos);
       }
 
-      if (pos !== index) {
+      if (pos !== index && !characterInSecondTeam) {
         this.gamePlay.selectCell(pos, "green");
       }
     });
@@ -288,7 +317,6 @@ export default class GameController {
     const positionSecondTeamBoolean = this.currentIndexCharacter.some(
       (pos) => positionSecondTeam && pos === positionSecondTeam.position
     );
-
     if (
       positionFirstTeam !== undefined ||
       (this.currentIndexCharacter.includes(index) && !positionSecondTeamBoolean)
@@ -304,10 +332,14 @@ export default class GameController {
 
   // ход игрока
   moveCharacterUser(index) {
+    const positionFirstTeam = this.positionTeam(this.firstCharTeam);
+    const positionSecondTeam = this.positionTeam(this.secondCharTeam);
+
     if (
-      this.firstCharTeam.active &&
       this.currentIndexCharacter.includes(index) &&
-      this.selectedPositionChar !== index
+      this.selectedPositionChar !== index &&
+      !positionFirstTeam.includes(index) &&
+      !positionSecondTeam.includes(index)
     ) {
       //изменение положения персонажа
       this.selectedCharacter[0].position = index;
@@ -315,28 +347,34 @@ export default class GameController {
       this.updateCharRedraw();
 
       //меняю флаги
-      this.firstCharTeam.active = false;
-      this.secondCharTeam.active = true;
+      this.firstCharTeam.active = !this.firstCharTeam.active;
+      this.secondCharTeam.active = !this.secondCharTeam.active;
       //сбрасываю массив с возможныи полями атаки
       this.currentIndexCharacter.length = 0;
     }
+    this.computerLogic();
   }
   // атака игроком
-  async attack(selectedChar, index) {
-    if (
-      !this.firstCharTeam.active ||
-      !Array.isArray(selectedChar) ||
-      !selectedChar.length
-    ) {
+  async attackCharacterUser(selectedChar, index) {
+    if (!Array.isArray(selectedChar) || !selectedChar.length) {
       return;
     }
 
     //атакующий перс игрока
     const attacker = selectedChar[0].character;
+    //защищающийся перс
+    let target;
+
     //защищающийся перс компа
-    let target = this.secondCharTeam.characters.find(
-      (character) => character.position === index
-    );
+    if (this.firstCharTeam.active) {
+      target = this.secondCharTeam.characters.find(
+        (character) => character.position === index
+      );
+    } else if (this.secondCharTeam.active) {
+      target = this.firstCharTeam.characters.find(
+        (character) => character.position === index
+      );
+    }
 
     if (
       target !== undefined &&
@@ -352,6 +390,9 @@ export default class GameController {
       target.health = target.health - hit;
       await this.gamePlay.showDamage(index, hit);
       this.updateCharRedraw();
+
+      this.firstCharTeam.active = !this.firstCharTeam.active;
+      this.secondCharTeam.active = !this.secondCharTeam.active;
     }
   }
   //обновление и прерисовка персов с новыми положениями
@@ -363,5 +404,44 @@ export default class GameController {
       (character) => character
     );
     this.gamePlay.redrawPositions([...positionFirst, ...positionSecond]);
+  }
+
+  // логика компьютера
+  computerLogic() {
+    // проверка очередности хода
+    if (this.firstCharTeam.active && !this.secondCharTeam.active) {
+      return;
+    }
+    this.selectedCharacter.length = 0;
+    // количество персонажей в команде
+    const countSecondTeam = this.countCharacter(this.secondCharTeam);
+
+    //выбор случайного перса
+    const select = Math.trunc(Math.random() * countSecondTeam);
+    const index = this.secondCharTeam.characters[select].position;
+    this.selectedCharacter.push(this.secondCharTeam.characters[select]);
+
+    this.areaForAttack(index);
+
+    const attackBollean = this.currentIndexCharacter.some((i) =>
+      this.firstCharTeam.characters
+        .map((charater) => charater.position)
+        .includes(i)
+    );
+    console.info(attackBollean);
+
+    if (attackBollean) {
+      this.attackCharacterUser(this.selectedCharacter, index);
+    } else if (!attackBollean) {
+      // Генерация случайного индекса
+      const randomIndex = Math.floor(
+        Math.random() * this.currentIndexCharacter.length
+      );
+
+      // Получение случайного элемента из массива
+      const randomElement = this.currentIndexCharacter[randomIndex];
+
+      this.moveCharacterUser(randomElement);
+    }
   }
 }
