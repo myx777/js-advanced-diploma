@@ -46,10 +46,11 @@ export default class GameController {
 
     // команды и отрисовка
     this.generationTeams();
-
-    this.gamePlay.addCellClickListener(this.onCellClick.bind(this));
-    this.gamePlay.addCellEnterListener(this.onCellEnter.bind(this));
-    this.gamePlay.addCellLeaveListener(this.onCellLeave.bind(this));
+    if(this.firstCharTeam.active && !this.secondCharTeam.active) {
+      this.gamePlay.addCellClickListener(this.onCellClick.bind(this));
+      this.gamePlay.addCellEnterListener(this.onCellEnter.bind(this));
+      this.gamePlay.addCellLeaveListener(this.onCellLeave.bind(this)); 
+    }
   }
 
   // формирование, расстановка и отрисовка персонажей в команде
@@ -168,11 +169,9 @@ export default class GameController {
 
   //действия при клике
   onCellClick(index) {
-    if (this.firstCharTeam.active) {
       this.getMarkCharacter(index);
       this.moveCharacterUser(index);
       this.attackCharacterUser(this.selectedCharacter, index);
-    }
   }
 
   //действия  при наведении
