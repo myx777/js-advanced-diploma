@@ -73,7 +73,6 @@ export default class GamePlay {
    * @param positions array of PositionedCharacter objects
    */
   redrawPositions(positions) {
-    
     for (const cell of this.cells) {
       cell.innerHTML = '';
     }
@@ -233,27 +232,26 @@ export default class GamePlay {
     this.cells[index].title = '';
   }
 
-// Метод для отображения урона и анимации
-showDamage(index, damage) {
-  return new Promise((resolve, reject) => {
-    const cell = this.cells[index];
-    if (!cell) {
-      reject(new Error(`Cell with index ${index} not found`));
-      return;
-    }
+  // Метод для отображения урона и анимации
+  showDamage(index, damage) {
+    return new Promise((resolve, reject) => {
+      const cell = this.cells[index];
+      if (!cell) {
+        reject(new Error(`Cell with index ${index} not found`));
+        return;
+      }
 
-    const damageEl = document.createElement('span');
-    damageEl.textContent = damage;
-    damageEl.classList.add('damage');
-    cell.appendChild(damageEl);
+      const damageEl = document.createElement('span');
+      damageEl.textContent = damage;
+      damageEl.classList.add('damage');
+      cell.appendChild(damageEl);
 
-    damageEl.addEventListener('animationend', () => {
-      cell.removeChild(damageEl);
-      resolve(); // Разрешаем Promise после завершения анимации
+      damageEl.addEventListener('animationend', () => {
+        cell.removeChild(damageEl);
+        resolve(); // Разрешаем Promise после завершения анимации
+      });
     });
-  });
-}
-
+  }
 
   setCursor(cursor) {
     this.boardEl.style.cursor = cursor;
@@ -297,5 +295,4 @@ showDamage(index, damage) {
     }
     return this.positionTeamSecond();
   }
-
 }
