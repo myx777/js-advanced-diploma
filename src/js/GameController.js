@@ -12,7 +12,6 @@ import { generateTeam } from './generators';
 import PositionedCharacter from './PositionedCharacter';
 import GameState from './GameState';
 import GamePlay from './GamePlay';
-import Team from './Team';
 
 export default class GameController {
   constructor(gamePlay, stateService) {
@@ -372,7 +371,7 @@ export default class GameController {
 
         target.character.health = target.character.health - hit;
 
-        if (target.character.health < 0) {
+        if (target.character.health < 1) {
             this.deadCharacter(target);
         }
 
@@ -452,10 +451,14 @@ export default class GameController {
       this.secondCharTeam.characters = this.secondCharTeam.characters.filter(
         (char) => char.position !== character.position,
       );
+      new GameState(this.secondCharTeam.characters);
+      
     } else {
       this.firstCharTeam.characters = this.firstCharTeam.characters.filter(
         (char) => char.position !== character.position,
       );
+      new GameState(this.firstCharTeam.characters);
+      
     }
   }
 }
