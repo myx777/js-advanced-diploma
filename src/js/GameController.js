@@ -184,9 +184,7 @@ export default class GameController {
 
   // Проверка принадлежности персонажа к команде
   get isCharacterInTeam() {
-    return (character, team) => team.characters.some(
-      (char) => char.position === character.position,
-    );
+    return (character, team) => team.characters.some((char) => char.position === character.position);
   }
 
   // количество персов в команде
@@ -349,51 +347,40 @@ export default class GameController {
 
   // атака игроком
   async attackCharacterUser(selectedChar, index) {
-    // debugger
-    if (!Array.isArray(selectedChar) || !selectedChar.length) {
-      return;
+    if (!Array.isArray(selectedChar) || !selectedChar.length || selectedChar[0].position === index) {
+        return;
     }
 
-    // атакующий перс игрока
     const attacker = selectedChar[0].character;
-    // защищающийся перс
     let target;
 
-    // защищающийся перс компа
     if (this.firstCharTeam.active) {
-      target = this.secondCharTeam.characters.find(
-        (character) => character.position === index,
-      );
+        target = this.secondCharTeam.characters.find(
+            (character) => character.position === index
+        );
     } else {
-      target = this.firstCharTeam.characters.find(
-        (character) => character.position === index,
-      );
+        target = this.firstCharTeam.characters.find(
+            (character) => character.position === index
+        );
     }
 
-    if (
-      target !== undefined
-      && attacker.health > 0
-      && this.currentIndexCharacter.includes(index)
-    ) {
-      target = target;
+    if (target !== undefined && attacker.health > 0 && this.currentIndexCharacter.includes(index)) {
+        const hit = Math.max(
+            attacker.attack - target.character.defence,
+            attacker.attack * 0.1
+        );
 
-      const hit = Math.max(
-        attacker.attack - target.character.defence,
-        attacker.attack * 0.1,
-      );
-      target.character.health = target.character.health - hit;
-      if (target.character.health < 0) {
-        this.deadCharacter(target);
-      }
+        target.character.health = target.character.health - hit;
 
-      // debugger;
-      console.info(target);
+        if (target.character.health < 0) {
+            this.deadCharacter(target);
+        }
 
-      try {
+        try {
+                  // Вызов анимации урона
         await this.gamePlay.showDamage(index, hit);
-      } catch (error) {
-        console.error('Ошибка при отображении урона:', error);
-      } finally {
+
+        // Обновление состояния игры после завершения анимации
         this.updateCharRedraw();
 
         this.currentIndexCharacter.length = 0;
@@ -401,10 +388,15 @@ export default class GameController {
 
         this.firstCharTeam.active = !this.firstCharTeam.active;
         this.secondCharTeam.active = !this.secondCharTeam.active;
+
+        // Вызов логики компьютера после завершения анимации
         this.computerLogic();
-      }
+        } catch (error) {
+            console.error(error);
+        }
     }
-  }
+}
+
 
   // обновление и прерисовка персов с новыми положениями
   updateCharRedraw() {
@@ -456,12 +448,14 @@ export default class GameController {
 
   // при смерти персонажа в команде фильтрую его из массива
   deadCharacter(character) {
-    debugger;
-    if (this.firstCharTeam.active
-      && !this.secondCharTeam.active) {
-      this.secondCharTeam.characters = this.secondCharTeam.characters.filter((char) => char.position !== character.position);
+    if (this.firstCharTeam.active && !this.secondCharTeam.active) {
+      this.secondCharTeam.characters = this.secondCharTeam.characters.filter(
+        (char) => char.position !== character.position,
+      );
     } else {
-      this.firstCharTeam.characters = this.firstCharTeam.characters.filter((char) => char.position !== character.position);
+      this.firstCharTeam.characters = this.firstCharTeam.characters.filter(
+        (char) => char.position !== character.position,
+      );
     }
   }
 }
