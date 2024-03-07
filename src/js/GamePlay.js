@@ -14,8 +14,6 @@ export default class GamePlay {
     this.loadGameListeners = [];
     // массив для регистрации занятых клеток персонажами
     this.arrayPosition = [];
-    // отображение инфо о персонаже
-    this.stateMessageInfo = false;
   }
 
   bindToDOM(container) {
@@ -187,10 +185,6 @@ export default class GamePlay {
 
   // отображение инфо о персонаже
   showMessage(message, index) {
-    // удаление при повторном клике
-    if (this.stateMessageInfo === true) {
-      this.removeMessage(index);
-    } else {
       const cell = this.cells[index];
 
       const infoMessage = document.createElement('div');
@@ -198,9 +192,6 @@ export default class GamePlay {
       infoMessage.textContent = message;
 
       cell.appendChild(infoMessage);
-      // this.setCursor(cursors.pointer);
-      this.stateMessageInfo = true;
-    }
   }
 
   // удаление отоброжаемой инфо о персонаже
