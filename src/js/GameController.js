@@ -47,14 +47,18 @@ export default class GameController {
 
   // начало игры, отрисовка поля и команд + формирование
   init() {
-    this.themeDraw(this.level);
+    if (this.level < 5) {
+      this.themeDraw(this.level);
 
-    // команды и отрисовка
-    this.generationTeams();
-    if (this.firstCharTeam.active && !this.secondCharTeam.active) {
-      this.gamePlay.addCellClickListener(this.onCellClick.bind(this));
-      this.gamePlay.addCellEnterListener(this.onCellEnter.bind(this));
-      this.gamePlay.addCellLeaveListener(this.onCellLeave.bind(this));
+      // команды и отрисовка
+      this.generationTeams();
+      if (this.firstCharTeam.active && !this.secondCharTeam.active) {
+        this.gamePlay.addCellClickListener(this.onCellClick.bind(this));
+        this.gamePlay.addCellEnterListener(this.onCellEnter.bind(this));
+        this.gamePlay.addCellLeaveListener(this.onCellLeave.bind(this));
+      }
+    } else {
+      this.endGame();
     }
   }
 
@@ -85,31 +89,37 @@ export default class GameController {
         this.characterCount = 2;
       }
     }
+    let firstTeam;
+    let secondTeam;
     // формирование команд
     const allowedTypesFirstTeam = [Bowman, Swordsman, Magician];
     const allowedTypesSecondTeam = [Vampire, Undead, Daemon];
 
     if (this.countFirstTeam === 0) {
-      this.firstTeam = generateTeam(
-        allowedTypesFirstTeam,
-        this.level,
-        this.characterCount
-      );
+      firstTeam = generateTeam(allowedTypesFirstTeam, 1, this.characterCount);
+      firstTeam = firstTeam.characters;
+    } else {
+      firstTeam = [];
+      this.firstCharTeam.characters.forEach((character) => {
+        firstTeam.push(character.character);
+      });
     }
 
     if (this.countSecondTeam === 0) {
-      this.secondTeam = generateTeam(
-        allowedTypesSecondTeam,
-        this.level,
-        this.characterCount
-      );
+      secondTeam = generateTeam(allowedTypesSecondTeam, 1, this.characterCount);
+      secondTeam = secondTeam.characters;
+    } else {
+      secondTeam = [];
+      this.secondCharTeam.characters.forEach((character) => {
+        secondTeam.push(character.character);
+      });
     }
 
     const positionFirst = [];
     const positionSecond = [];
 
     // расстановка персонажей
-    this.firstTeam.characters.forEach((character) => {
+    firstTeam.forEach((character) => {
       if (character) {
         const index = this.gamePlay.positionTeamFirst();
         const positionedCharacter = new PositionedCharacter(character, index);
@@ -117,7 +127,7 @@ export default class GameController {
       }
     });
 
-    this.secondTeam.characters.forEach((character) => {
+    secondTeam.forEach((character) => {
       if (character) {
         const index = this.gamePlay.positionTeamSecond();
         const positionedCharacter = new PositionedCharacter(character, index);
@@ -460,6 +470,9 @@ export default class GameController {
 
   // логика компьютера
   computerLogic() {
+    if(this.level > 4){
+      return;
+    }
     // проверка очередности хода
     if (this.firstCharTeam.active && !this.secondCharTeam.active) {
       return;
@@ -507,6 +520,7 @@ export default class GameController {
 
       this.countSecondTeam = this.countCharacter(this.secondCharTeam);
       if (this.countSecondTeam === 0) {
+        // debugger
         this.levelUp(this.firstCharTeam);
       }
     } else {
@@ -516,7 +530,8 @@ export default class GameController {
 
       this.countFirstTeam = this.countCharacter(this.firstCharTeam);
       if (this.countFirstTeam === 0) {
-        this.levelUp(this.secondCharTeam);
+        this.endGame();
+        // this.levelUp(this.secondCharTeam);
       }
     }
   }
@@ -540,6 +555,23 @@ export default class GameController {
     });
 
     this.level += 1;
+
+    this.init();
+  }
+
+  // конец игры
+  endGame() {
+    this.gamePlay.addNewGameListener(this.addNewGameClick.bind(this));
+  }
+
+  addNewGameClick() {
+    // сброс игры
+    this.level = 1;
+    this.firstCharTeam = null;
+    this.secondCharTeam = null;
+    this.countSecondTeam = 0;
+    this.countFirstTeam = 0;
+    // инициализация новой
     this.init();
   }
 }
