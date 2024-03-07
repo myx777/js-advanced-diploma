@@ -60,6 +60,41 @@ export default class GameController {
     } else {
       this.endGame();
     }
+    this.gamePlay.addSaveGameListener(this.gamePlayaddSaveGameClick.bind(this));
+    this.gamePlay.addLoadGameListener(this.gamePlayaddLoadGameClick.bind(this));
+  }
+
+  // сохранение игры
+  gamePlayaddSaveGameClick() {
+    console.info("gamePlayaddSaveGameClick");
+    try {
+      console.info(this.firstCharTeam, this.secondCharTeam);
+      
+      const gameState = [this.firstCharTeam, this.secondCharTeam, this.level];
+      this.stateService.save(gameState);
+      console.log("Состояние игры успешно сохранено.");
+    } catch (error) {
+      console.error("Ошибка при сохранении состояния игры:", error);
+    }
+  }
+
+  // загрузка сохраненной игры
+  gamePlayaddLoadGameClick() {
+    // this.resetGame();
+    console.info("gamePlayaddLoadGameClick");
+    const gameState = this.stateService.load();
+
+    console.info(gameState);
+
+    this.firstCharTeam = gameState[0];
+    this.secondCharTeam = gameState[1];
+
+    this.level = gameState[2];
+
+
+    this.themeDraw(this.level);
+    this.updateCharRedraw();
+
   }
 
   // тема поля и отрисовка
@@ -146,6 +181,7 @@ export default class GameController {
 
     // отрисовка
     this.gamePlay.redrawPositions([...positionFirst, ...positionSecond]);
+    // this.updateCharRedraw();
   }
 
   // отображение инфо при клике или наведении
@@ -344,6 +380,8 @@ export default class GameController {
 
   // маркируем курсор при возможных действий перса
   markedActionChar(index) {
+    console.info(this.firstCharTeam);
+    
     this.secondCharTeam.characters.forEach((character) => {
       this.gamePlay.deselectCell(character.position);
     });
@@ -470,7 +508,7 @@ export default class GameController {
 
   // логика компьютера
   computerLogic() {
-    if(this.level > 4){
+    if (this.level === 5) {
       return;
     }
     // проверка очередности хода
@@ -565,13 +603,17 @@ export default class GameController {
   }
 
   addNewGameClick() {
-    // сброс игры
+    this.resetGame();
+    // инициализация новой
+    this.init();
+  }
+
+  // сброс игры
+  resetGame(){
     this.level = 1;
     this.firstCharTeam = null;
     this.secondCharTeam = null;
     this.countSecondTeam = 0;
     this.countFirstTeam = 0;
-    // инициализация новой
-    this.init();
   }
 }
