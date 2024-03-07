@@ -47,9 +47,7 @@ export default class GameController {
 
   // начало игры, отрисовка поля и команд + формирование
   init() {
-    // поле
-    this.theme = themes.prairie;
-    this.gamePlay.drawUi(this.theme);
+    this.themeDraw(this.level);
 
     // команды и отрисовка
     this.generationTeams();
@@ -60,6 +58,25 @@ export default class GameController {
     }
   }
 
+  // тема поля и отрисовка
+  themeDraw(level) {
+    switch (level) {
+      case 1:
+        this.theme = themes.prairie;
+        break;
+      case 2:
+        this.theme = themes.desert;
+        break;
+      case 3:
+        this.theme = themes.arctic;
+        break;
+      case 4:
+        this.theme = themes.mountain;
+        break;
+    }
+    this.gamePlay.drawUi(this.theme);
+  }
+
   // формирование, расстановка и отрисовка персонажей в команде
   generationTeams() {
     if (this.level === 1) {
@@ -67,25 +84,25 @@ export default class GameController {
       if (this.characterCount === 0) {
         this.characterCount = 2;
       }
-      // формирование команд
-      const allowedTypesFirstTeam = [Bowman, Swordsman, Magician];
-      const allowedTypesSecondTeam = [Vampire, Undead, Daemon];
+    }
+    // формирование команд
+    const allowedTypesFirstTeam = [Bowman, Swordsman, Magician];
+    const allowedTypesSecondTeam = [Vampire, Undead, Daemon];
 
-      if(this.countFirstTeam === 0) {
-        this.firstTeam = generateTeam(
-          allowedTypesFirstTeam,
-          this.level,
-          this.characterCount
-        );
-      }
+    if (this.countFirstTeam === 0) {
+      this.firstTeam = generateTeam(
+        allowedTypesFirstTeam,
+        this.level,
+        this.characterCount
+      );
+    }
 
-      if(this.countSecondTeam === 0) {
-        this.secondTeam = generateTeam(
-          allowedTypesSecondTeam,
-          this.level,
-          this.characterCount
-        );
-      }
+    if (this.countSecondTeam === 0) {
+      this.secondTeam = generateTeam(
+        allowedTypesSecondTeam,
+        this.level,
+        this.characterCount
+      );
     }
 
     const positionFirst = [];
@@ -119,9 +136,6 @@ export default class GameController {
 
     // отрисовка
     this.gamePlay.redrawPositions([...positionFirst, ...positionSecond]);
-
-    console.info(this.firstCharTeam);
-    console.info(this.secondCharTeam);
   }
 
   // отображение инфо при клике или наведении
@@ -450,14 +464,6 @@ export default class GameController {
     if (this.firstCharTeam.active && !this.secondCharTeam.active) {
       return;
     }
-    if (this.countSecondTeam === 0) {
-      console.info("0 перс");
-
-      this.levelUp(this.firstCharTeam);
-    } else if (this.countFirstTeam === 0) {
-      console.info("0 перс");
-      this.levelUp(this.secondCharTeam);
-    }
 
     this.selectedCharacter.length = 0;
 
@@ -500,29 +506,26 @@ export default class GameController {
       );
 
       this.countSecondTeam = this.countCharacter(this.secondCharTeam);
-      console.info(this.secondCharTeam);
-      console.info(this.countSecondTeam);
+      if (this.countSecondTeam === 0) {
+        this.levelUp(this.firstCharTeam);
+      }
     } else {
       this.firstCharTeam.characters = this.firstCharTeam.characters.filter(
         (char) => char.position !== character.position
       );
 
       this.countFirstTeam = this.countCharacter(this.firstCharTeam);
-      console.info(this.firstCharTeam);
-      console.info(this.countFirstTeam);
+      if (this.countFirstTeam === 0) {
+        this.levelUp(this.secondCharTeam);
+      }
     }
   }
 
-  // повышение уровня при смерти всех персов в одной из комманд
+  // повышение уровня, здоровья, атаки и защиты при смерти всех персов в одной из команд
   levelUp(team) {
     team.characters.forEach((char) => {
-      console.info("повышение уровня" + char);
-      
-      // Увеличение уровня персонажа
       char.character.level += 1;
 
-
-      // Повышение показателей атаки и защиты
       const lifePercentage = char.character.health / 100;
       char.character.attack = Math.max(
         char.character.attack,
@@ -533,11 +536,9 @@ export default class GameController {
         Math.round((char.character.defence * (80 + lifePercentage * 100)) / 100)
       );
 
-
-      // Повышение здоровья персонажа
       char.character.health = Math.min(char.character.health + 80, 100);
     });
-    
+
     this.level += 1;
     this.init();
   }
