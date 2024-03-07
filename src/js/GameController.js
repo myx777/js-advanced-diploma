@@ -17,7 +17,9 @@ export default class GameController {
   constructor(gamePlay, stateService) {
     this.gamePlay = gamePlay;
     this.stateService = stateService;
-    this.level = null;
+    this.level = 1;
+
+    // начальное количество персонажей
     this.characterCount = null;
 
     // возможные клетки атаки
@@ -37,10 +39,10 @@ export default class GameController {
     this.selectedPositionChar = null;
 
     // количество персов во 2 команде
-    this.countSecondTeam = null;
+    this.countSecondTeam = 0;
 
     // количество персов в 1 команде
-    this.countFirstTeam = null;
+    this.countFirstTeam = 0;
   }
 
   // начало игры, отрисовка поля и команд + формирование
@@ -60,27 +62,31 @@ export default class GameController {
 
   // формирование, расстановка и отрисовка персонажей в команде
   generationTeams() {
-    this.level = 1;
+    if (this.level === 1) {
+      this.characterCount = Math.trunc(Math.random() * 10);
+      if (this.characterCount === 0) {
+        this.characterCount = 2;
+      }
+      // формирование команд
+      const allowedTypesFirstTeam = [Bowman, Swordsman, Magician];
+      const allowedTypesSecondTeam = [Vampire, Undead, Daemon];
 
-    this.characterCount = Math.trunc(Math.random() * 10);
-    if (this.characterCount === 0) {
-      this.characterCount = 2;
+      if(this.countFirstTeam === 0) {
+        this.firstTeam = generateTeam(
+          allowedTypesFirstTeam,
+          this.level,
+          this.characterCount
+        );
+      }
+
+      if(this.countSecondTeam === 0) {
+        this.secondTeam = generateTeam(
+          allowedTypesSecondTeam,
+          this.level,
+          this.characterCount
+        );
+      }
     }
-    // формирование команд
-    const allowedTypesFirstTeam = [Bowman, Swordsman, Magician];
-    const allowedTypesSecondTeam = [Vampire, Undead, Daemon];
-
-    this.firstTeam = generateTeam(
-      allowedTypesFirstTeam,
-      this.level,
-      this.characterCount
-    );
-
-    this.secondTeam = generateTeam(
-      allowedTypesSecondTeam,
-      this.level,
-      this.characterCount
-    );
 
     const positionFirst = [];
     const positionSecond = [];
@@ -113,6 +119,9 @@ export default class GameController {
 
     // отрисовка
     this.gamePlay.redrawPositions([...positionFirst, ...positionSecond]);
+
+    console.info(this.firstCharTeam);
+    console.info(this.secondCharTeam);
   }
 
   // отображение инфо при клике или наведении
@@ -126,7 +135,7 @@ export default class GameController {
       ...this.firstCharTeam.characters,
       ...this.secondCharTeam.characters,
     ];
-    
+
     chars.forEach((character) => {
       if (character !== undefined && character.position === index) {
         const levelCharacter = character.character.level;
@@ -138,7 +147,6 @@ export default class GameController {
         this.gamePlay.showMessage(message, index);
       }
     });
-    
   }
 
   // выделение кликнутого персонажа команды
@@ -442,10 +450,16 @@ export default class GameController {
     if (this.firstCharTeam.active && !this.secondCharTeam.active) {
       return;
     }
+    if (this.countSecondTeam === 0) {
+      console.info("0 перс");
+
+      this.levelUp(this.firstCharTeam);
+    } else if (this.countFirstTeam === 0) {
+      console.info("0 перс");
+      this.levelUp(this.secondCharTeam);
+    }
 
     this.selectedCharacter.length = 0;
-    // количество персонажей в команде
-    this.countSecondTeam = this.countCharacter(this.secondCharTeam);
 
     // выбор случайного перса
     const select = Math.trunc(Math.random() * this.countSecondTeam);
@@ -484,16 +498,47 @@ export default class GameController {
       this.secondCharTeam.characters = this.secondCharTeam.characters.filter(
         (char) => char.position !== character.position
       );
-      this.secondCharTeam = new GameState(this.secondCharTeam.characters);
+
       this.countSecondTeam = this.countCharacter(this.secondCharTeam);
+      console.info(this.secondCharTeam);
+      console.info(this.countSecondTeam);
     } else {
       this.firstCharTeam.characters = this.firstCharTeam.characters.filter(
         (char) => char.position !== character.position
       );
-      this.firstCharTeam.characters = new GameState(
-        this.firstCharTeam.characters
-      );
+
       this.countFirstTeam = this.countCharacter(this.firstCharTeam);
+      console.info(this.firstCharTeam);
+      console.info(this.countFirstTeam);
     }
+  }
+
+  // повышение уровня при смерти всех персов в одной из комманд
+  levelUp(team) {
+    team.characters.forEach((char) => {
+      console.info("повышение уровня" + char);
+      
+      // Увеличение уровня персонажа
+      char.character.level += 1;
+
+
+      // Повышение показателей атаки и защиты
+      const lifePercentage = char.character.health / 100;
+      char.character.attack = Math.max(
+        char.character.attack,
+        Math.round((char.character.attack * (80 + lifePercentage * 100)) / 100)
+      );
+      char.character.defence = Math.max(
+        char.character.defence,
+        Math.round((char.character.defence * (80 + lifePercentage * 100)) / 100)
+      );
+
+
+      // Повышение здоровья персонажа
+      char.character.health = Math.min(char.character.health + 80, 100);
+    });
+    
+    this.level += 1;
+    this.init();
   }
 }

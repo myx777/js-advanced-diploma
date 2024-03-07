@@ -2,8 +2,6 @@ export default class GameState {
   constructor(characters) {
     this.characters = characters;
     this.active = false;
-    console.info(characters);
-    
   }
 
   static from(object) {
