@@ -66,10 +66,7 @@ export default class GameController {
 
   // сохранение игры
   gamePlayaddSaveGameClick() {
-    console.info("gamePlayaddSaveGameClick");
-    try {
-      console.info(this.firstCharTeam, this.secondCharTeam);
-      
+    try {     
       const gameState = [this.firstCharTeam, this.secondCharTeam, this.level];
       this.stateService.save(gameState);
       console.log("Состояние игры успешно сохранено.");
@@ -80,15 +77,13 @@ export default class GameController {
 
   // загрузка сохраненной игры
   gamePlayaddLoadGameClick() {
-    // this.resetGame();
-    console.info("gamePlayaddLoadGameClick");
+    this.resetGame();
     const gameState = this.stateService.load();
 
-    console.info(gameState);
-
-    this.firstCharTeam = gameState[0];
-    this.secondCharTeam = gameState[1];
-
+    this.firstCharTeam = new GameState(gameState[0].characters);
+    this.secondCharTeam = new GameState(gameState[1].characters);
+    this.firstCharTeam.active = true;
+    
     this.level = gameState[2];
 
 
@@ -169,7 +164,7 @@ export default class GameController {
         positionSecond.push(positionedCharacter);
       }
     });
-
+    
     this.firstCharTeam = new GameState(positionFirst);
     this.secondCharTeam = new GameState(positionSecond);
 
@@ -380,8 +375,6 @@ export default class GameController {
 
   // маркируем курсор при возможных действий перса
   markedActionChar(index) {
-    console.info(this.firstCharTeam);
-    
     this.secondCharTeam.characters.forEach((character) => {
       this.gamePlay.deselectCell(character.position);
     });
@@ -517,7 +510,8 @@ export default class GameController {
     }
 
     this.selectedCharacter.length = 0;
-
+    console.info(this.secondCharTeam);
+    
     // выбор случайного перса
     const select = Math.trunc(Math.random() * this.countSecondTeam);
     const indexComp = this.secondCharTeam.characters[select].position;
